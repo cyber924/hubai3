@@ -1,0 +1,6 @@
+{
+  "name": "HubStudio 3 — Multi-Tenant Content Workshop",
+  "description": "An interactive full-stack workspace to connect a shared image repository to custom-branded editorial visual platforms, offering AI planning, blog generation, strict multi-modal reviews, and SEO-optimized public article publishing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

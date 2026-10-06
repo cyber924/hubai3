@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "Image": {
+      "title": "Image",
+      "description": "Common image assets stored in the hub",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "tags": { "type": "array" },
+        "visibility": { "type": "string", "enum": ["public", "private"] },
+        "ownerId": { "type": "string" },
+        "dataUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "visibility", "ownerId"]
+    },
+    "BlogPost": {
+      "title": "Blog Post",
+      "description": "Blog post content generated and edited within the hub site",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "sections": {
+          "type": "array"
+        },
+        "status": { "type": "string", "enum": ["draft", "published"] },
+        "ownerId": { "type": "string" },
+        "tone": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "seoTags": { "type": "array" },
+        "metaDescription": { "type": "string" },
+        "reviewReport": { "type": "object" }
+      },
+      "required": ["title", "status", "ownerId", "sections"]
+    },
+    "WorkLog": {
+      "title": "Work Log",
+      "description": "History of generator and quality reviews",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["planning", "generation", "review", "publish"] },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "details": { "type": "object" }
+      },
+      "required": ["userId", "type", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/images/{imageId}": {
+      "schema": "Image",
+      "description": "Shared image repository"
+    },
+    "/sites/{siteId}/blogs/{blogId}": {
+      "schema": "BlogPost",
+      "description": "Site-specific blog content"
+    },
+    "/sites/{siteId}/logs/{logId}": {
+      "schema": "WorkLog",
+      "description": "Audit trail and execution logs for content creation"
+    }
+  }
+}
