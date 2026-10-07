@@ -682,9 +682,16 @@ async function startServer() {
       const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
       const origin = `${protocol}://${host}`;
 
-      const pubCol = collection(serverDb, 'publishedContents');
-      const snapshot = await getDocs(pubCol);
-      const articles = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
+      let articles: any[] = [];
+      try {
+        const pubCol = collection(serverDb, 'publishedContents');
+        const snapshot = await getDocs(query(pubCol, where('status', '==', 'published')));
+        articles = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (error) {
+        // The webzine already displays these public seed posts when DB access fails.
+        // Keep their valid detail URLs discoverable without turning a DB outage into HTTP 500.
+        console.warn('Sitemap database unavailable; using visible seed posts:', error);
+      }
 
       const now = new Date();
       let publicList = articles.filter((b: any) => {
