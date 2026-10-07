@@ -40,5 +40,25 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isSignedIn() && resource.data.userId == request.auth.uid;
     }
+
+    // Content projects (drafts & saved blogs)
+    match /contentProjects/{blogId} {
+      allow read: if resource.data.status == 'published' || (request.auth != null && resource.data.ownerId == request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Published contents (anyone can read public posts)
+    match /publishedContents/{blogId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // Active ads (anyone can read public ads)
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
   }
 }

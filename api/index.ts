@@ -6,7 +6,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import * as admin from 'firebase-admin';
 
 dotenv.config();
 
@@ -36,6 +37,102 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
 const serverDb = getFirestore(firebaseApp);
+
+try {
+  if (admin && (admin as any).apps && (admin as any).apps.length === 0) {
+    (admin as any).initializeApp({
+      projectId: process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"
+    });
+  }
+} catch (adminErr) {
+  console.warn("Failed to initialize firebase-admin, using client fallback:", adminErr);
+}
+const adminDb = (admin && (admin as any).apps && (admin as any).apps.length > 0) ? (admin as any).firestore() : null;
+
+// Predefined fallback seed blogs for zero-blank-screen SEO indexing
+const SERVER_SEED_BLOGS: Record<string, any> = {
+  "seed_blog_product": {
+    id: "seed_blog_product",
+    title: "정제된 형태와 본질적 유용성: 미니멀 브루잉 세트",
+    summary: "도심 속 바쁜 일상에서 벗어나, 매일 아침 오감을 일깨우는 에스프레소 브루잉 리추얼의 아름다움과 도구 디자인에 대한 심층적 탐구.",
+    sections: [
+      {
+        title: "도구가 제안하는 아침의 정적",
+        imageId: "img_espresso_minimal",
+        imageCaption: "황동 필터와 무광 세라믹 바디가 조화를 이루는 프리미엄 브루잉 기어",
+        content: "모든 것이 빠르게 스쳐 지나가는 도심 속에서 매일 아침 단 10분간 에스프레소를 브루잉하는 시간은 단순한 음용을 넘어 오롯이 나에게 집중하는 리추얼이 됩니다. 이 세트는 미니멀한 실루엣 뒤에 가려진 정밀한 유용성으로 정교한 추출 경험을 설계합니다."
+      },
+      {
+        title: "오가닉 촉감과 디테일의 완성",
+        imageId: "img_ceramic_vase",
+        imageCaption: "핸드메이드 세라믹 표면의 자연스러운 크랙과 빈티지 마감",
+        content: "손끝에 닿는 자연스러운 흙의 질감은 금속 기기가 주지 못하는 따뜻한 아날로그적 온기를 불어넣습니다. 정밀한 물줄기 제어와 일정한 온도 유지를 돕는 디테일들은 전문가 에디터들이 매일 아침 극찬하는 요소이기도 합니다."
+      }
+    ],
+    status: "published",
+    ownerId: "system_curator",
+    tone: "Informative",
+    themePersona: "hub3",
+    seoTags: ["미니멀", "홈카페", "세라믹"],
+    metaDescription: "정제된 형태와 본질적 유용성을 추구하는 프리미엄 미니멀리스트 브루잉 에스프레소 세트의 에디토리얼 사용기 및 디자인 탐구.",
+    updatedAt: "2026-10-05T20:00:00.000Z",
+    createdAt: "2026-10-05T20:00:00.000Z"
+  },
+  "seed_blog_lifestyle": {
+    id: "seed_blog_lifestyle",
+    title: "교토의 새벽, 대나무 숲길에서 마주한 온전한 평정",
+    summary: "빛과 바람이 머무는 곳, 아침 안개 속에 숨겨진 자연의 흐름을 따라 걸으며 머릿속 복잡한 생각들을 내려놓는 치유의 시간.",
+    sections: [
+      {
+        title: "바람의 소리에 귀 기울이는 법",
+        imageId: "img_kyoto_path",
+        imageCaption: "초록빛 안개가 내려앉은 이른 아침의 사가노 대나무 숲길",
+        content: "군중이 몰려들기 전 이른 새벽의 교토 대나무 숲길은 오직 대나무 잎사귀들이 서로 부딪히는 바스락거리는 소리와 바람 소리만이 가득합니다. 한 걸음씩 내딛을 때마다 가슴 깊은 곳까지 청량한 공기가 채워지며 가벼운 카타르시스를 느끼게 됩니다."
+      },
+      {
+        title: "시간이 멈춘 듯한 골목의 정취",
+        imageId: "img_tokyo_night",
+        imageCaption: "골목길마다 자리 잡은 고즈넉한 등불과 아늑한 공간들",
+        content: "자연의 신비에서 깨어나 도심의 뒤안길을 걷다 보면, 작은 다도실과 핸드드립 카페들이 길을 밝힙니다. 지역 에디터들과 라이프스타일 큐레이터들이 공간 마케팅의 정수로 손꼽는 이 공간들은 지친 현대인에게 작은 마음의 안식처를 내어줍니다."
+      }
+    ],
+    status: "published",
+    ownerId: "system_curator",
+    tone: "Storytelling",
+    themePersona: "hub4",
+    seoTags: ["교토여행", "힐링", "대나무숲"],
+    metaDescription: "교토 사가노 대나무 숲길의 이른 아침을 거닐며 찾은 현대인의 온전한 평정과 느린 여행 가이드.",
+    updatedAt: "2026-10-05T21:00:00.000Z",
+    createdAt: "2026-10-05T21:00:00.000Z"
+  },
+  "seed_blog_magazine": {
+    id: "seed_blog_magazine",
+    title: "설산의 경계를 달리는 붉은 열차: 알프스의 낭만",
+    summary: "새하얀 캔버스 위에 그려지는 붉은색 한 줄기 선, 스위스 베르니나 특급 열차를 타고 만나는 만년설과 차가운 공기 속 아날로그 여행의 깊이.",
+    sections: [
+      {
+        title: "만년설이 그린 장엄한 프레임",
+        imageId: "img_swiss_train",
+        imageCaption: "만년설의 능선을 가로지르며 겨울의 낭만을 선사하는 스위스 기차",
+        content: "창밖으로 펼쳐지는 비현실적인 높이의 설산과 거대한 빙하는 보는 이로 하여금 경외감을 불러일으킵니다. 차가운 유리창 너너로 따사롭게 스며드는 햇살과 아날로그적인 기차의 덜컹거림은 속도 중심의 일상에서 벗어난 느림의 여행이 선사하는 특권입니다."
+      },
+      {
+        title: "차가운 오감 묘사와 감성의 교차",
+        imageId: "img_iceland_cabin",
+        imageCaption: "적막함 속에 포근함을 전하는 혹한기 오두막의 실루엣",
+        content: "문명을 떠나 차가운 대지 위에 굳건히 서 있는 아늑한 보금자리는 고독의 긍정적인 힘을 생각하게 만듭니다. 따뜻한 허브티 한 잔과 빈티지 다이어리 한 권만 있다면, 그 어디든 나만의 영혼을 치유하는 글쓰기 작업실이 탄생합니다."
+      }
+    ],
+    status: "published",
+    ownerId: "system_curator",
+    tone: "Elegant",
+    themePersona: "hub2",
+    seoTags: ["스위스", "알프스", "기차여행"],
+    metaDescription: "만년설이 장엄하게 어우러진 알프스를 관통하는 빨간 기차와 혹한기 속 아늑한 오두막 에세이.",
+    updatedAt: "2026-10-05T22:00:00.000Z",
+    createdAt: "2026-10-05T22:00:00.000Z"
+  }
+};
 
 // 6.3 Public image endpoint to return binary data from base64
 app.get('/api/images/:id/public', async (req, res) => {
@@ -87,6 +184,73 @@ app.get('/api/images/:id/public', async (req, res) => {
   } catch (error: any) {
     console.error('Error fetching image public binary:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+// Privileged endpoint to fetch all published articles, bypassing Firestore rules
+app.get('/api/public/blogs', async (req, res) => {
+  try {
+    let pubList: any[] = [];
+    let projList: any[] = [];
+    let originalBlogs: any[] = [];
+
+    if (adminDb) {
+      const pubSnap = await adminDb.collection('publishedContents').get();
+      pubList = pubSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+
+      const projSnap = await adminDb.collection('contentProjects').where('status', '==', 'published').get();
+      projList = projSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+
+      const tenantIds = ['hub2', 'hub3', 'hub4'];
+      for (const tId of tenantIds) {
+        try {
+          const snap = await adminDb.collection('sites').doc(tId).collection('blogs').where('status', '==', 'published').get();
+          const list = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+          originalBlogs = [...originalBlogs, ...list];
+        } catch (err) {
+          console.warn(`Failed to fetch original blogs for ${tId}:`, err);
+        }
+      }
+    } else {
+      // Fallback if adminDb is not initialized (e.g. local dev)
+      try {
+        const pubCol = collection(serverDb, 'publishedContents');
+        const snapshot = await getDocs(pubCol);
+        pubList = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        console.warn("Fallback failed for publishedContents:", err);
+      }
+
+      try {
+        const draftCol = collection(serverDb, 'contentProjects');
+        const q = query(draftCol, where('status', '==', 'published'));
+        const snapshot = await getDocs(q);
+        projList = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        console.warn("Fallback failed for contentProjects:", err);
+      }
+
+      const tenantIds = ['hub2', 'hub3', 'hub4'];
+      for (const tId of tenantIds) {
+        try {
+          const sitesBlogsCol = collection(serverDb, 'sites', tId, 'blogs');
+          const q = query(sitesBlogsCol, where('status', '==', 'published'));
+          const snapshot = await getDocs(q);
+          const list = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+          originalBlogs = [...originalBlogs, ...list];
+        } catch (err) {
+          console.warn(`Fallback failed for site ${tId} blogs:`, err);
+        }
+      }
+    }
+
+    const merged = [...pubList, ...projList, ...originalBlogs];
+    const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+
+    res.status(200).json(unique);
+  } catch (error: any) {
+    console.error("Failed to fetch public blogs from adminDb:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -519,13 +683,18 @@ async function startServer() {
       const articles = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as any[];
 
       const now = new Date();
-      const publicList = articles.filter((b: any) => {
+      let publicList = articles.filter((b: any) => {
         if (!b.title || !b.id) return false;
         if (b.status !== 'published') return false;
         const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
         if (pubDate > now) return false;
         return true;
       });
+
+      // If the database has no published articles, include our fallback seed blogs in the sitemap too!
+      if (publicList.length === 0) {
+        publicList = Object.values(SERVER_SEED_BLOGS);
+      }
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
@@ -557,16 +726,21 @@ async function startServer() {
       const origin = `${protocol}://${host}`;
       const canonicalUrl = `${origin}/blog/${postId}`;
 
-      const projectRef = doc(serverDb, 'contentProjects', postId);
-      const projectSnap = await getDoc(projectRef);
-
       let blogData: any = null;
       let isPublished = false;
 
-      if (projectSnap.exists()) {
-        blogData = projectSnap.data();
-        if (blogData.status === 'published') {
-          isPublished = true;
+      if (SERVER_SEED_BLOGS[postId]) {
+        blogData = SERVER_SEED_BLOGS[postId];
+        isPublished = true;
+      } else {
+        const projectRef = doc(serverDb, 'contentProjects', postId);
+        const projectSnap = await getDoc(projectRef);
+
+        if (projectSnap.exists()) {
+          blogData = projectSnap.data();
+          if (blogData.status === 'published') {
+            isPublished = true;
+          }
         }
       }
 
