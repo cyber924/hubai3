@@ -1,5 +1,4 @@
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -657,7 +656,7 @@ Perform a strict quality check. Score overall blog out of 100, and grade each se
 // Serve frontend client
 const PORT = process.env.PORT || 3000;
 
-async function startServer() {
+function startServer() {
   // ────────────────────────────
   // Dynamic robots.txt Route
   // ────────────────────────────
@@ -840,35 +839,12 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true' || process.env.VERCEL) {
-    // In production/sandbox, serve static compiled assets
-    const distPath = path.resolve(__dirname, '../dist');
-    app.use(express.static(distPath));
-    
-    app.get('*', (req, res) => {
-      res.sendFile(path.resolve(distPath, 'index.html'));
-    });
-  } else {
-    // In dev mode, mount Vite middlewares
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    
-    app.use(vite.middlewares);
-    
-    app.use('*', async (req, res, next) => {
-      const url = req.originalUrl;
-      try {
-        let template = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf-8');
-        template = await vite.transformIndexHtml(url, template);
-        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as Error);
-        next(e);
-      }
-    });
-  }
+  // Vercel runs the API only; Vite is exclusively a build/development tool.
+  const distPath = path.resolve(__dirname, '../dist');
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(distPath, 'index.html'));
+  });
 
   // Only bind port listener when run persistently (not on Vercel lambda cold start)
   if (!process.env.VERCEL) {
