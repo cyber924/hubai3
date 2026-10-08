@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
-import * as admin from 'firebase-admin';
 
 dotenv.config();
 
@@ -26,27 +25,25 @@ const ai = new GoogleGenAI({
   },
 });
 
-// Initialize Firebase server-side for image fetching and validation with robust hardcoded fallbacks
-const firebaseConfig = {
-  apiKey: process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDEpFAsf1fI65xXklKYsukAWFYw5bzaHyc",
-  authDomain: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.firebaseapp.com`,
-  projectId: process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a",
-  storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.appspot.com`,
-};
+// Initialize Firebase server-side for image fetching and validation with dynamic config loading
+let firebaseConfig: any;
+try {
+  const configPath = path.resolve(__dirname, './firebase-applet-config.json');
+  firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+} catch (err) {
+  console.warn("Failed to read firebase-applet-config.json, using hardcoded fallback:", err);
+  firebaseConfig = {
+    apiKey: process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDEpFAsf1fI65xXklKYsukAWFYw5bzaHyc",
+    authDomain: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.firebaseapp.com`,
+    projectId: process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a",
+    storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.appspot.com`,
+  };
+}
 
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
-const serverDb = getFirestore(firebaseApp);
+const serverDb = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
 
-try {
-  if (admin && (admin as any).apps && (admin as any).apps.length === 0) {
-    (admin as any).initializeApp({
-      projectId: process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"
-    });
-  }
-} catch (adminErr) {
-  console.warn("Failed to initialize firebase-admin, using client fallback:", adminErr);
-}
-const adminDb = (admin && (admin as any).apps && (admin as any).apps.length > 0) ? (admin as any).firestore() : null;
+// Initialize Firebase server-side for image fetching and validation with dynamic config loading
 
 // Predefined fallback seed blogs for zero-blank-screen SEO indexing
 const SERVER_SEED_BLOGS: Record<string, any> = {
@@ -133,6 +130,40 @@ const SERVER_SEED_BLOGS: Record<string, any> = {
   }
 };
 
+const CANONICAL_BASE_URL = 'https://hubai3.vercel.app';
+
+async function getPublicPublishedArticles(): Promise<any[]> {
+  try {
+    const pubCol = collection(serverDb, 'publishedContents');
+    const q = query(pubCol, where('status', '==', 'published'), where('visibility', '==', 'public'));
+    const snapshot = await getDocs(q);
+    const pubList = snapshot.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+
+    const now = new Date();
+    let filtered = pubList.filter((b: any) => {
+      if (!b.title || !b.id) return false;
+      const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
+      if (pubDate > now) return false;
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      filtered = Object.values(SERVER_SEED_BLOGS);
+    }
+
+    filtered.sort((a: any, b: any) => {
+      const tA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const tB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      return tB - tA;
+    });
+
+    return filtered;
+  } catch (err: any) {
+    console.error("[DATABASE ERROR] Failed in getPublicPublishedArticles:", err);
+    throw err;
+  }
+}
+
 // 6.3 Public image endpoint to return binary data from base64
 app.get('/api/images/:id/public', async (req, res) => {
   try {
@@ -186,69 +217,13 @@ app.get('/api/images/:id/public', async (req, res) => {
   }
 });
 
-// Privileged endpoint to fetch all published articles, bypassing Firestore rules
+// Public endpoint to fetch all published articles matching public published status
 app.get('/api/public/blogs', async (req, res) => {
   try {
-    let pubList: any[] = [];
-    let projList: any[] = [];
-    let originalBlogs: any[] = [];
-
-    if (adminDb) {
-      const pubSnap = await adminDb.collection('publishedContents').get();
-      pubList = pubSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-
-      const projSnap = await adminDb.collection('contentProjects').where('status', '==', 'published').get();
-      projList = projSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-
-      const tenantIds = ['hub2', 'hub3', 'hub4'];
-      for (const tId of tenantIds) {
-        try {
-          const snap = await adminDb.collection('sites').doc(tId).collection('blogs').where('status', '==', 'published').get();
-          const list = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
-          originalBlogs = [...originalBlogs, ...list];
-        } catch (err) {
-          console.warn(`Failed to fetch original blogs for ${tId}:`, err);
-        }
-      }
-    } else {
-      // Fallback if adminDb is not initialized (e.g. local dev)
-      try {
-        const pubCol = collection(serverDb, 'publishedContents');
-        const snapshot = await getDocs(pubCol);
-        pubList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (err) {
-        console.warn("Fallback failed for publishedContents:", err);
-      }
-
-      try {
-        const draftCol = collection(serverDb, 'contentProjects');
-        const q = query(draftCol, where('status', '==', 'published'));
-        const snapshot = await getDocs(q);
-        projList = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (err) {
-        console.warn("Fallback failed for contentProjects:", err);
-      }
-
-      const tenantIds = ['hub2', 'hub3', 'hub4'];
-      for (const tId of tenantIds) {
-        try {
-          const sitesBlogsCol = collection(serverDb, 'sites', tId, 'blogs');
-          const q = query(sitesBlogsCol, where('status', '==', 'published'));
-          const snapshot = await getDocs(q);
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          originalBlogs = [...originalBlogs, ...list];
-        } catch (err) {
-          console.warn(`Fallback failed for site ${tId} blogs:`, err);
-        }
-      }
-    }
-
-    const merged = [...pubList, ...projList, ...originalBlogs];
-    const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
-
-    res.status(200).json(unique);
+    const articles = await getPublicPublishedArticles();
+    res.status(200).json(articles);
   } catch (error: any) {
-    console.error("Failed to fetch public blogs from adminDb:", error);
+    console.error("Failed to fetch public blogs:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -662,15 +637,23 @@ Perform a strict quality check. Score overall blog out of 100, and grade each se
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
+  let viteInstance: any = null;
+
+  if (process.env.NODE_ENV !== 'production' && process.env.DISABLE_HMR !== 'true' && !process.env.VERCEL) {
+    const { createServer: createViteServer } = await import('vite');
+    viteInstance = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(viteInstance.middlewares);
+  }
+
   // ────────────────────────────
   // Dynamic robots.txt Route
   // ────────────────────────────
   app.get('/robots.txt', (req, res) => {
-    const host = req.headers.host || 'localhost:3000';
-    const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-    const origin = `${protocol}://${host}`;
     res.setHeader('Content-Type', 'text/plain');
-    res.status(200).send(`User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml`);
+    res.status(200).send(`User-agent: *\nAllow: /\n\nSitemap: ${CANONICAL_BASE_URL}/sitemap.xml`);
   });
 
   // ────────────────────────────
@@ -678,52 +661,133 @@ async function startServer() {
   // ────────────────────────────
   app.get('/sitemap.xml', async (req, res) => {
     try {
-      const host = req.headers.host || 'localhost:3000';
-      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-      const origin = `${protocol}://${host}`;
-
       let articles: any[] = [];
       try {
-        const pubCol = collection(serverDb, 'publishedContents');
-        const snapshot = await getDocs(query(pubCol, where('status', '==', 'published')));
-        articles = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (error) {
-        // The webzine already displays these public seed posts when DB access fails.
-        // Keep their valid detail URLs discoverable without turning a DB outage into HTTP 500.
-        console.warn('Sitemap database unavailable; using visible seed posts:', error);
-      }
-
-      const now = new Date();
-      let publicList = articles.filter((b: any) => {
-        if (!b.title || !b.id) return false;
-        if (b.status !== 'published') return false;
-        const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
-        if (pubDate > now) return false;
-        return true;
-      });
-
-      // If the database has no published articles, include our fallback seed blogs in the sitemap too!
-      if (publicList.length === 0) {
-        publicList = Object.values(SERVER_SEED_BLOGS);
+        articles = await getPublicPublishedArticles();
+      } catch (dbErr) {
+        console.error("Sitemap database fetch failed:", dbErr);
+        res.status(500).send("Error generating sitemap due to database failure");
+        return;
       }
 
       let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
       xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
-      xml += `  <url>\n    <loc>${origin}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${CANONICAL_BASE_URL}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${CANONICAL_BASE_URL}/blog</loc>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
 
-      for (const b of publicList) {
-        const postUrl = `${origin}/blog/${b.id}`;
+      for (const b of articles) {
+        const postUrl = `${CANONICAL_BASE_URL}/blog/${b.id}`;
         const lastmodDate = new Date(b.updatedAt || b.modifiedAt || b.publishedAt || b.createdAt || Date.now()).toISOString();
         xml += `  <url>\n    <loc>${postUrl}</loc>\n    <lastmod>${lastmodDate}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n`;
       }
       xml += `</urlset>`;
 
       res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=60, stale-while-revalidate=600');
       res.status(200).send(xml);
     } catch (err: any) {
       console.error("Sitemap error:", err);
       res.status(500).send("Error generating sitemap");
     }
+  });
+
+  // Helper to load templates dynamically
+  async function loadIndexTemplate(urlPath: string): Promise<string> {
+    let template = "";
+    const distPath = path.resolve(__dirname, './dist/index.html');
+    const rootPath = path.resolve(__dirname, 'index.html');
+    const templatePath = (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true') && fs.existsSync(distPath)
+      ? distPath
+      : fs.existsSync(rootPath) ? rootPath : distPath;
+
+    if (fs.existsSync(templatePath)) {
+      template = fs.readFileSync(templatePath, 'utf-8');
+    } else {
+      template = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8" /><title>AURA Webzine</title></head><body><div id="root"></div></body></html>`;
+    }
+
+    if (viteInstance) {
+      template = await viteInstance.transformIndexHtml(urlPath, template);
+    }
+    return template;
+  }
+
+  // ────────────────────────────
+  // Dynamic / & /blog & /webzine Router (List View SSR)
+  // ────────────────────────────
+  const listRoutes = ['/', '/blog', '/webzine'];
+  listRoutes.forEach(routePath => {
+    app.get(routePath, async (req, res, next) => {
+      // Allow exact matches only, avoid matching static file requests or other subroutes
+      if (routePath === '/' && req.path !== '/') {
+        return next();
+      }
+      try {
+        const canonicalUrl = `${CANONICAL_BASE_URL}${routePath === '/' ? '' : routePath}`;
+
+        let articles: any[] = [];
+        try {
+          articles = await getPublicPublishedArticles();
+        } catch (dbErr: any) {
+          console.error(`[DATABASE ERROR] Failed to fetch articles for list on ${routePath}:`, dbErr);
+          res.status(500).send(`<!DOCTYPE html><html><head><title>서버 오류 | AURA Webzine</title></head><body><h1>서버 오류</h1><p>데이터베이스 연결 도중 장애가 발생했습니다. 잠시 후 다시 시도해 주세요.</p></body></html>`);
+          return;
+        }
+
+        let template = await loadIndexTemplate(req.originalUrl);
+
+        const titleText = "허브스튜디오 3 — 멀티 테넌트 비주얼 콘텐츠 워크숍";
+        const descText = "공통 이미지 허브의 자산을 사용해 제작하는 감각적인 기획, 블로그 생성, 검수 및 배포 통합 스튜디오";
+
+        const seoMeta = `
+          <title>${titleText}</title>
+          <meta name="description" content="${descText}">
+          <link rel="canonical" href="${canonicalUrl}">
+          <meta property="og:type" content="website">
+          <meta property="og:title" content="${titleText}">
+          <meta property="og:description" content="${descText}">
+          <meta property="og:url" content="${canonicalUrl}">
+        `;
+
+        const articlesHtml = articles.map(art => {
+          const coverImageId = art.sections?.[0]?.imageId || "";
+          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+          return `
+            <article class="blog-card" style="margin-bottom: 2rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
+              <img src="${coverUrl}" alt="${art.title}" style="width:100%; max-height:300px; object-fit: cover; border-radius: 0.5rem;" />
+              <h2 style="font-size: 1.25rem; font-weight: bold; margin-top: 1rem;">${art.title}</h2>
+              <p style="color: #4b5563; font-size: 0.875rem; margin-top: 0.5rem;">${art.summary}</p>
+              <a href="/blog/${art.id}" style="color: #10b981; font-weight: bold; text-decoration: none; margin-top: 1rem; display: inline-block;">Read Post →</a>
+            </article>
+          `;
+        }).join('\n');
+
+        const listHtml = `
+          <div class="max-w-6xl mx-auto py-12" style="padding: 2rem; font-family: sans-serif;">
+            <header style="margin-bottom: 2rem;">
+              <h1 style="font-size: 2rem; font-weight: bold;">STUDIO 3 통합 에디토리얼 웹진</h1>
+              <p style="color: #6b7280; margin-top: 0.5rem;">제품 상세페이지, 라이프 블로그, 매거진 에세이를 아우르는 최고 감도의 기사들을 큐레이션합니다.</p>
+            </header>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin-bottom: 2rem;" />
+            <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+              ${articlesHtml}
+            </div>
+          </div>
+        `;
+
+        template = template.replace(/<title>[^<]*<\/title>/g, '');
+        template = template.replace(/<meta name="description"[^>]*>/g, '');
+        template = template.replace(/<link rel="canonical"[^>]*>/g, '');
+        template = template.replace(/<meta property="og:[^>]*>/g, '');
+        template = template.replace('<head>', `<head>${seoMeta}`);
+        template = template.replace('<div id="root"></div>', `<div id="root">${listHtml}</div>`);
+
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (err: any) {
+        console.error("List render error:", err);
+        next(err);
+      }
+    });
   });
 
   // ────────────────────────────
@@ -732,73 +796,56 @@ async function startServer() {
   app.get('/blog/:id', async (req, res, next) => {
     try {
       const postId = req.params.id;
-      const host = req.headers.host || 'localhost:3000';
-      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-      const origin = `${protocol}://${host}`;
-      const canonicalUrl = `${origin}/blog/${postId}`;
+      const canonicalUrl = `${CANONICAL_BASE_URL}/blog/${postId}`;
 
-      let blogData: any = null;
-      let isPublished = false;
-
-      if (SERVER_SEED_BLOGS[postId]) {
-        blogData = SERVER_SEED_BLOGS[postId];
-        isPublished = true;
-      } else {
-        const projectRef = doc(serverDb, 'contentProjects', postId);
-        const projectSnap = await getDoc(projectRef);
-
-        if (projectSnap.exists()) {
-          blogData = projectSnap.data();
-          if (blogData.status === 'published') {
-            isPublished = true;
-          }
-        }
+      let articles: any[] = [];
+      try {
+        articles = await getPublicPublishedArticles();
+      } catch (dbErr: any) {
+        console.error(`[DATABASE ERROR] Failed to fetch articles for blog detail ${postId}:`, dbErr);
+        res.status(500).send(`<!DOCTYPE html><html><head><title>서버 오류 | AURA Webzine</title></head><body><h1>서버 오류</h1><p>데이터베이스 연결 도중 장애가 발생했습니다. 잠시 후 다시 시도해 주세요.</p></body></html>`);
+        return;
       }
 
-      if (!blogData || !isPublished) {
-        let template = "";
-        const distPath = path.resolve(__dirname, './dist/index.html');
-        const rootPath = path.resolve(__dirname, 'index.html');
-        const templatePath = (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true') && fs.existsSync(distPath)
-          ? distPath
-          : fs.existsSync(rootPath) ? rootPath : distPath;
+      let blogData = articles.find(a => a.id === postId);
 
-        if (fs.existsSync(templatePath)) {
-          template = fs.readFileSync(templatePath, 'utf-8');
-        } else {
-          template = `<!DOCTYPE html><html><head><title>글을 찾을 수 없습니다 | AURA Webzine</title></head><body>요청한 글을 찾을 수 없습니다.</body></html>`;
-        }
+      if (!blogData) {
+        let template = await loadIndexTemplate(req.originalUrl);
 
         const meta404 = `
           <title>글을 찾을 수 없습니다 | AURA Webzine</title>
           <meta name="robots" content="noindex, follow">
+          <link rel="canonical" href="${canonicalUrl}">
         `;
         template = template.replace(/<title>[^<]*<\/title>/g, '');
         template = template.replace(/<meta name="robots"[^>]*>/g, '');
+        template = template.replace(/<link rel="canonical"[^>]*>/g, '');
         template = template.replace('<head>', `<head>${meta404}`);
+
+        const errorHtml = `
+          <div class="max-w-md mx-auto my-12 bg-white rounded-2xl border border-neutral-200 p-8 text-center shadow-md" style="font-family: sans-serif; text-align: center; padding: 3rem;">
+            <h1 style="font-size: 1.5rem; font-weight: bold; color: #111827;">글을 찾을 수 없습니다</h1>
+            <p style="color: #6b7280; font-size: 0.875rem; margin-top: 1rem; line-height: 1.5;">
+              요청하신 게시글이 존재하지 않거나, 비공개 상태로 변경되어 열람할 수 없습니다.
+            </p>
+            <a href="/" style="margin-top: 1.5rem; display: inline-block; padding: 0.5rem 1.5rem; font-size: 0.875rem; font-weight: bold; border-radius: 0.5rem; background: #111827; color: #fff; text-decoration: none;">
+              홈으로 이동
+            </a>
+          </div>
+        `;
+        template = template.replace('<div id="root"></div>', `<div id="root">${errorHtml}</div>`);
         template = template.replace('<body>', `<body><script>window.__NOT_FOUND__ = true;</script>`);
 
         res.status(404).set({ 'Content-Type': 'text/html' }).end(template);
         return;
       }
 
-      let template = "";
-      const distPath = path.resolve(__dirname, './dist/index.html');
-      const rootPath = path.resolve(__dirname, 'index.html');
-      const templatePath = (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true') && fs.existsSync(distPath)
-        ? distPath
-        : fs.existsSync(rootPath) ? rootPath : distPath;
-
-      if (fs.existsSync(templatePath)) {
-        template = fs.readFileSync(templatePath, 'utf-8');
-      } else {
-        template = `<!DOCTYPE html><html><head></head><body></body></html>`;
-      }
+      let template = await loadIndexTemplate(req.originalUrl);
 
       const postTitle = blogData.title || "Untitled Article";
       const postSummary = blogData.summary || "Bespoke Editorial Article";
       const coverImageId = blogData.sections?.[0]?.imageId || "";
-      const postImageUrl = coverImageId ? `${origin}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
       const publishedDateIso = new Date(blogData.createdAt || Date.now()).toISOString();
       const modifiedDateIso = new Date(blogData.updatedAt || Date.now()).toISOString();
       const authorName = blogData.authorName || 'Official Editor';
@@ -822,7 +869,7 @@ async function startServer() {
         "publisher": {
           "@type": "Organization",
           "name": "AURA Webzine",
-          "url": origin
+          "url": CANONICAL_BASE_URL
         }
       };
 
@@ -840,18 +887,67 @@ async function startServer() {
         <script type="application/ld+json">${JSON.stringify(schemaJson, null, 2)}</script>
       `;
 
+      const relatedArticles = articles.filter(a => a.id !== postId).slice(0, 2);
+      const relatedHtml = relatedArticles.map(rec => `
+        <div class="rec-article" style="border: 1px solid #e5e7eb; padding: 1rem; border-radius: 0.75rem; background: #fff;">
+          <a href="/blog/${rec.id}" style="color: #111827; text-decoration: none; font-weight: bold;">
+            <h3 style="font-size: 1rem; margin: 0 0 0.5rem 0;">${rec.title}</h3>
+          </a>
+          <p style="color: #4b5563; font-size: 0.75rem; margin: 0; line-height: 1.4;">${rec.summary}</p>
+        </div>
+      `).join('');
+
+      const sectionsHtml = (blogData.sections || []).map((sec: any, idx: number) => `
+        <section class="section" style="margin-bottom: 2.5rem;">
+          <h2 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; color: #1f2937;">0${idx + 1} ${sec.title}</h2>
+          ${sec.imageId ? `<div style="margin: 1.5rem 0;"><img src="${CANONICAL_BASE_URL}/api/images/${sec.imageId}/public" alt="${sec.imageCaption || sec.title || 'section image'}" style="width: 100%; max-height: 480px; object-fit: cover; border-radius: 0.75rem; border: 1px solid #f3f4f6;" /></div>` : ''}
+          ${sec.imageCaption ? `<p class="caption" style="text-align: center; color: #9ca3af; font-size: 0.75rem; font-style: italic; margin-top: -1rem; margin-bottom: 1.5rem;">${sec.imageCaption}</p>` : ''}
+          <div class="content" style="color: #4b5563; font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">${sec.content || ''}</div>
+        </section>
+      `).join('');
+
+      const serverArticleHtml = `
+        <div class="max-w-4xl mx-auto py-8" style="padding: 2rem; font-family: sans-serif;">
+          <article class="blog-post">
+            <header style="margin-bottom: 2rem;">
+              <div class="meta" style="color: #9ca3af; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; text-transform: uppercase;">
+                <span>AURA EDITORIAL WEBZINE</span> · 
+                <span>${new Date(blogData.updatedAt || blogData.createdAt).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+              </div>
+              <h1 style="font-size: 2rem; font-weight: bold; line-height: 1.3; color: #111827; margin-bottom: 1rem;">${postTitle}</h1>
+              <p class="summary" style="font-size: 1.1rem; color: #4b5563; line-height: 1.6; border-left: 4px solid #e5e7eb; padding-left: 1rem; font-style: italic;">${postSummary}</p>
+            </header>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin-bottom: 2.5rem;" />
+            <div class="sections">
+              ${sectionsHtml}
+            </div>
+            <hr style="border: 0; border-top: 1px solid #e5e7eb; margin-top: 2.5rem; margin-bottom: 2rem;" />
+            <div class="related-posts" style="margin-bottom: 2.5rem;">
+              <h4 style="font-size: 0.875rem; font-weight: bold; color: #1f2937; text-transform: uppercase; margin-bottom: 1rem;">이 시간 인기 추천 아티클</h4>
+              <div class="related-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+                ${relatedHtml}
+              </div>
+            </div>
+            <div class="tags" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              ${(blogData.seoTags || []).map((tag: string) => `<span style="font-size: 0.75rem; color: #9ca3af; background: #f3f4f6; padding: 0.25rem 0.75rem; border-radius: 9999px;">#${tag}</span>`).join(' ')}
+            </div>
+          </article>
+        </div>
+      `;
+
       template = template.replace(/<title>[^<]*<\/title>/g, '');
       template = template.replace(/<meta name="description"[^>]*>/g, '');
       template = template.replace(/<link rel="canonical"[^>]*>/g, '');
       template = template.replace(/<meta property="og:[^>]*>/g, '');
       template = template.replace(/<meta property="article:[^>]*>/g, '');
       template = template.replace('<head>', `<head>${richSeoMeta}`);
+      template = template.replace('<div id="root"></div>', `<div id="root">${serverArticleHtml}</div>`);
       template = template.replace('<body>', `<body><script>window.__PRELOADED_BLOG__ = ${JSON.stringify(blogData)};</script>`);
 
       res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
     } catch (err: any) {
       console.error("Dynamic blog error:", err);
-      next(err);
+      res.status(500).send(`<!DOCTYPE html><html><head><title>서버 오류 | AURA Webzine</title></head><body><h1>서버 오류</h1><p>콘텐츠를 가져오는 과정에서 기술적 오류가 발생했습니다.</p></body></html>`);
     }
   });
 
@@ -874,23 +970,18 @@ async function startServer() {
       }
     });
   } else {
-    // In dev mode, mount Vite middlewares
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    
-    app.use(vite.middlewares);
-    
+    // Vite Dev fallback catch-all
     app.use('*', async (req, res, next) => {
-      const url = req.originalUrl;
       try {
         let template = fs.readFileSync(path.resolve(__dirname, 'index.html'), 'utf-8');
-        template = await vite.transformIndexHtml(url, template);
+        if (viteInstance) {
+          template = await viteInstance.transformIndexHtml(req.originalUrl, template);
+        }
         res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-      } catch (e) {
-        vite.ssrFixStacktrace(e as Error);
+      } catch (e: any) {
+        if (viteInstance) {
+          viteInstance.ssrFixStacktrace(e as Error);
+        }
         next(e);
       }
     });

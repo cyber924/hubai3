@@ -332,6 +332,7 @@ export default function App() {
   // Navigation & Routing state
   const [currentRoute, setCurrentRoute] = useState<string>('webzine'); // webzine | gallery | studio | history | read
   const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
+  const [publicArticlesError, setPublicArticlesError] = useState<string | null>(null);
 
   // Active Multi-tenant Site Persona ID
   const [activeSiteId, setActiveSiteId] = useState<string>('hub3'); // Default to hub3
@@ -439,10 +440,13 @@ export default function App() {
       // 2. If server passed a preloaded blog post
       if ((window as any).__PRELOADED_BLOG__) {
         const blog = (window as any).__PRELOADED_BLOG__;
-        setReadingBlog(blog);
-        setSelectedBlogId(blog.id);
-        setCurrentRoute('read');
-        return;
+        const currentPath = window.location.pathname;
+        if (currentPath === `/blog/${blog.id}`) {
+          setReadingBlog(blog);
+          setSelectedBlogId(blog.id);
+          setCurrentRoute('read');
+          return;
+        }
       }
 
       // 3. Intercept legacy hash-based URLs (redirect to clean paths)
@@ -809,88 +813,54 @@ export default function App() {
     }
   };
 
-  // Load All Public Articles from publishedContents, contentProjects and sites/{siteId}/blogs (accessible to anyone)
+  // Load All Public Articles from publishedContents matching public published status (accessible to anyone)
   const loadPublicArticles = async () => {
     setLoadingPublicArticles(true);
+    setPublicArticlesError(null);
     let firestorePublished: any[] = [];
-    let firestoreDrafts: any[] = [];
-    let localStorageArticles: any[] = [];
     let fetchedFromApi = false;
 
-    // 1. Try fetching from Server-side Privileged API first (bypasses Firestore rules, using Firebase Admin with full master read permissions)
+    // 1. Try fetching from Server-side Public API first
     try {
       const response = await fetch('/api/public/blogs');
       if (response.ok) {
         const list = await response.json();
-        if (Array.isArray(list) && list.length > 0) {
+        if (Array.isArray(list)) {
           firestorePublished = list;
           fetchedFromApi = true;
-          console.log(`Successfully fetched ${list.length} public articles from admin server API`);
+          console.log(`Successfully fetched ${list.length} public articles from public server API`);
+        } else {
+          throw new Error("Invalid API response format");
         }
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server API returned status ${response.status}`);
       }
-    } catch (apiErr) {
-      console.warn("Failed to fetch public blogs from server API:", apiErr);
+    } catch (apiErr: any) {
+      console.warn("Failed to fetch public blogs from server API:", apiErr.message);
+      setPublicArticlesError(apiErr.message);
     }
 
-    // If server API fails or returns nothing, fallback to direct client-side Firestore reads
+    // If server API fails or returns nothing, fallback to direct client-side Firestore reads on publishedContents
     if (!fetchedFromApi) {
-      // 1. Fetch from Firestore publishedContents (published blogs)
       try {
         const pubCol = collection(db, 'publishedContents');
-        const snapshot = await getDocs(pubCol);
-        firestorePublished = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (err) {
-        console.warn("Could not load publishedContents from Firestore:", err);
-      }
-
-      // 2. Fetch from Firestore contentProjects (saved blogs/drafts)
-      try {
-        const draftCol = collection(db, 'contentProjects');
-        const q = query(draftCol, where('status', '==', 'published'));
+        const q = query(pubCol, where('status', '==', 'published'), where('visibility', '==', 'public'));
         const snapshot = await getDocs(q);
-        firestoreDrafts = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      } catch (err) {
-        console.warn("Could not load contentProjects from Firestore:", err);
-      }
-
-      // 2.5 Fetch from Firestore sites/{siteId}/blogs (original multi-tenant subcollection)
-      const tenantIds = ['hub2', 'hub3', 'hub4'];
-      for (const tId of tenantIds) {
-        try {
-          const sitesBlogsCol = collection(db, 'sites', tId, 'blogs');
-          const q = query(sitesBlogsCol, where('status', '==', 'published'));
-          const snapshot = await getDocs(q);
-          const list = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-          firestoreDrafts = [...firestoreDrafts, ...list];
-        } catch (err) {
-          console.warn(`Could not load blogs for site ${tId} from Firestore:`, err);
-        }
+        firestorePublished = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        setPublicArticlesError(null); // Clear error if client fallback succeeds
+      } catch (fallbackErr: any) {
+        console.error("Client-side direct Firestore queries also failed:", fallbackErr.message);
+        setPublicArticlesError(prev => prev || fallbackErr.message);
       }
     }
 
-    // 3. Fetch from LocalStorage
-    try {
-      const keys = Object.keys(localStorage);
-      for (const k of keys) {
-        if (k.startsWith('sites_') && k.includes('_blogs_')) {
-          const data = localStorage.getItem(k);
-          if (data) {
-            const list = JSON.parse(data);
-            localStorageArticles = [...localStorageArticles, ...list];
-          }
-        }
-      }
-    } catch (lsErr) {
-      console.error("LocalStorage fallback error in loadPublicArticles:", lsErr);
-    }
-
-    // 4. Merge, Auto-Classify and Deduplicate
-    const merged = [...firestorePublished, ...firestoreDrafts, ...localStorageArticles];
+    // 4. Cache and Deduplicate
+    const merged = firestorePublished;
     
     // Save to global public articles cache in LocalStorage if we successfully fetched anything from Firestore!
-    if (firestorePublished.length > 0 || firestoreDrafts.length > 0) {
-      const dbOnly = [...firestorePublished, ...firestoreDrafts];
-      localStorage.setItem('aura_public_articles_cache', JSON.stringify(dbOnly));
+    if (firestorePublished.length > 0) {
+      localStorage.setItem('aura_public_articles_cache', JSON.stringify(firestorePublished));
     }
 
     // Load from cache if merged is empty
@@ -902,11 +872,7 @@ export default function App() {
       }
     }
 
-    // If still empty, only then fallback to SEED_BLOGS
-    if (finalMerged.length === 0) {
-      finalMerged = SEED_BLOGS;
-    }
-
+    // UNIQUE DEDUPLICATED LIST BY DOCUMENT ID ONLY (NO TITLE COLLAPSING AS REQUESTED)
     const uniqueList = Array.from(new Map(finalMerged.map(item => [item.id, item])).values());
     
     uniqueList.forEach((b: any) => {
@@ -931,25 +897,14 @@ export default function App() {
       return new Date(val).getTime() || 0;
     };
 
-    // 5. COLLAPSE DUPLICATES BY TITLE (Keep the most recently updated non-empty ones)
-    const collapsedArticles: any[] = [];
-    const seenTitles = new Set<string>();
-    
+    // Sort by updated/created timestamp descending
     uniqueList.sort((a: any, b: any) => {
       const tA = getTimestampMs(a.updatedAt || a.createdAt);
       const tB = getTimestampMs(b.updatedAt || b.createdAt);
       return tB - tA;
     });
     
-    for (const b of uniqueList) {
-      const titleKey = (b.title || '').trim().toLowerCase();
-      if (titleKey && !seenTitles.has(titleKey)) {
-        seenTitles.add(titleKey);
-        collapsedArticles.push(b);
-      }
-    }
-    
-    setPublicArticles(collapsedArticles);
+    setPublicArticles(uniqueList);
     setLoadingPublicArticles(false);
   };
 
@@ -1800,6 +1755,24 @@ export default function App() {
                     </div>
                   ))}
                 </div>
+              ) : publicArticlesError ? (
+                <div className="text-center py-20 bg-red-50/50 rounded-2xl border border-red-200/60 max-w-lg mx-auto space-y-4">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto text-red-500">
+                    <span className="text-lg font-bold">!</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-red-800">공개 아티클 조회 중 오류가 발생했습니다.</p>
+                    <p className="text-xs text-red-600 leading-relaxed font-light max-w-md mx-auto">
+                      {publicArticlesError}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => loadPublicArticles()}
+                    className="px-4 py-2 text-xs font-semibold rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-50 transition-colors mx-auto block cursor-pointer"
+                  >
+                    다시 시도하기 (Retry)
+                  </button>
+                </div>
               ) : publicArticles.filter(a => archiveFilter === 'all' || a.themePersona === archiveFilter).length === 0 ? (
                 <div className="text-center py-20 bg-[#FCFAF7]/50 rounded-2xl border border-stone-200/60 max-w-lg mx-auto space-y-4">
                   <div className="w-12 h-12 bg-stone-100 rounded-full flex items-center justify-center mx-auto text-stone-400">
@@ -2302,9 +2275,7 @@ export default function App() {
 
                               <button
                                 onClick={() => {
-                                  setSelectedBlogId(article.id);
-                                  window.location.hash = `#/blog/${article.id}`;
-                                  setCurrentRoute('read');
+                                  navigateTo('read', `/blog/${article.id}`);
                                 }}
                                 className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-stone-900 hover:bg-stone-800 text-stone-100 transition-all flex items-center gap-1 cursor-pointer font-serif italic"
                               >
@@ -3759,9 +3730,7 @@ export default function App() {
                               <div 
                                 key={rec.id}
                                 onClick={() => {
-                                  setSelectedBlogId(rec.id);
-                                  window.location.hash = `#_webzine_${rec.themePersona === 'hub3' ? 'product' : rec.themePersona === 'hub4' ? 'lifestyle' : 'magazine'}_${rec.id}`;
-                                  setCurrentRoute('read');
+                                  navigateTo('read', `/blog/${rec.id}`);
                                   window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                                 className="group flex gap-3 p-3 bg-neutral-50/50 hover:bg-neutral-50 border border-neutral-200/60 rounded-xl cursor-pointer transition-all duration-300 items-center"

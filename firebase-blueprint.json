@@ -46,6 +46,21 @@
         "details": { "type": "object" }
       },
       "required": ["userId", "type", "timestamp"]
+    },
+    "Ad": {
+      "title": "Ad",
+      "description": "Sponsored brand partnership ad banner",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "voucherCode": { "type": "string" },
+        "linkUrl": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "imageSizeKb": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "voucherCode", "linkUrl"]
     }
   },
   "firestore": {
@@ -60,6 +75,18 @@
     "/sites/{siteId}/logs/{logId}": {
       "schema": "WorkLog",
       "description": "Audit trail and execution logs for content creation"
+    },
+    "/publishedContents/{blogId}": {
+      "schema": "BlogPost",
+      "description": "Published blog posts"
+    },
+    "/contentProjects/{blogId}": {
+      "schema": "BlogPost",
+      "description": "Saved blog posts/drafts"
+    },
+    "/ads/{adId}": {
+      "schema": "Ad",
+      "description": "Partner advertisements"
     }
   }
 }
