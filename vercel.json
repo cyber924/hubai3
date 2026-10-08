@@ -6,7 +6,10 @@
   "outputDirectory": "dist",
   "functions": {
     "api/index.ts": {
-      "includeFiles": "dist/**"
+      "includeFiles": [
+        "dist/**",
+        "firebase-applet-config.json"
+      ]
     }
   },
   "headers": [

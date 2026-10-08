@@ -28,15 +28,31 @@ const ai = new GoogleGenAI({
 // Initialize Firebase server-side for image fetching and validation with dynamic config loading
 let firebaseConfig: any;
 try {
-  const configPath = path.resolve(__dirname, './firebase-applet-config.json');
-  firebaseConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+  const configPaths = [
+    path.join(process.cwd(), 'firebase-applet-config.json'),
+    path.resolve(__dirname, '../firebase-applet-config.json'),
+    path.resolve(__dirname, './firebase-applet-config.json'),
+    path.resolve(__dirname, 'firebase-applet-config.json')
+  ];
+  let loaded = false;
+  for (const p of configPaths) {
+    if (fs.existsSync(p)) {
+      firebaseConfig = JSON.parse(fs.readFileSync(p, 'utf-8'));
+      loaded = true;
+      break;
+    }
+  }
+  if (!loaded) {
+    throw new Error("firebase-applet-config.json not found in any of the search paths");
+  }
 } catch (err) {
   console.warn("Failed to read firebase-applet-config.json, using hardcoded fallback:", err);
   firebaseConfig = {
-    apiKey: process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyDEpFAsf1fI65xXklKYsukAWFYw5bzaHyc",
-    authDomain: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.firebaseapp.com`,
-    projectId: process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a",
-    storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "studio-9240700230-1dd9a"}.appspot.com`,
+    apiKey: process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyA8D5yXUcGChsxz4Dx3e6_qgzkHCXMAjCE",
+    authDomain: `${process.env.IMAGE_HUB_PROJECT_ID || "agentdock"}.firebaseapp.com`,
+    projectId: process.env.IMAGE_HUB_PROJECT_ID || "agentdock",
+    firestoreDatabaseId: "ai-studio-hubstudio3multit-b72f2ec8-4d59-4f2e-8ddb-5affb5e15524",
+    storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "agentdock"}.firebasestorage.app`,
   };
 }
 
@@ -147,9 +163,7 @@ async function getPublicPublishedArticles(): Promise<any[]> {
       return true;
     });
 
-    if (filtered.length === 0) {
-      filtered = Object.values(SERVER_SEED_BLOGS);
-    }
+    // No longer fall back to SERVER_SEED_BLOGS. When empty, return empty array.
 
     filtered.sort((a: any, b: any) => {
       const tA = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -694,13 +708,24 @@ async function startServer() {
   // Helper to load templates dynamically
   async function loadIndexTemplate(urlPath: string): Promise<string> {
     let template = "";
-    const distPath = path.resolve(__dirname, './dist/index.html');
-    const rootPath = path.resolve(__dirname, 'index.html');
-    const templatePath = (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true') && fs.existsSync(distPath)
-      ? distPath
-      : fs.existsSync(rootPath) ? rootPath : distPath;
+    const possiblePaths = [
+      path.join(process.cwd(), 'dist/index.html'),
+      path.resolve(__dirname, './dist/index.html'),
+      path.resolve(__dirname, '../dist/index.html'),
+      path.join(process.cwd(), 'index.html'),
+      path.resolve(__dirname, 'index.html'),
+      path.resolve(__dirname, '../index.html')
+    ];
 
-    if (fs.existsSync(templatePath)) {
+    let templatePath = "";
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        templatePath = p;
+        break;
+      }
+    }
+
+    if (templatePath) {
       template = fs.readFileSync(templatePath, 'utf-8');
     } else {
       template = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8" /><title>AURA Webzine</title></head><body><div id="root"></div></body></html>`;

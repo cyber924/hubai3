@@ -873,7 +873,9 @@ export default function App() {
     }
 
     // UNIQUE DEDUPLICATED LIST BY DOCUMENT ID ONLY (NO TITLE COLLAPSING AS REQUESTED)
-    const uniqueList = Array.from(new Map(finalMerged.map(item => [item.id, item])).values());
+    // Filter out mockups/seed articles so they never appear on the webzine list
+    const uniqueList = Array.from(new Map(finalMerged.map(item => [item.id, item])).values())
+      .filter((b: any) => b.id && !b.id.startsWith('seed_blog_'));
     
     uniqueList.forEach((b: any) => {
       if (!b.themePersona) {
