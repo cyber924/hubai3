@@ -42,5 +42,5 @@
       "destination": "/api/index"
     }
   ],
-  "installCommand": "npm ci --include=optional"
+  "installCommand": "npm install --include=optional"
 }
