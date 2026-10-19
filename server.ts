@@ -1,3 +1,4 @@
+import { hasReadableArticleBody } from './src/lib/public-article';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -55,6 +56,19 @@ try {
     storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "agentdock"}.firebasestorage.app`,
   };
 }
+
+
+const configuredProject = process.env.IMAGE_HUB_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+const configuredKey = process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+const configuredDatabase = process.env.IMAGE_HUB_DATABASE_ID || process.env.FIRESTORE_DATABASE_ID;
+firebaseConfig = {
+  ...firebaseConfig,
+  ...(configuredProject ? { projectId: configuredProject } : {}),
+  ...(configuredKey ? { apiKey: configuredKey } : {}),
+  firestoreDatabaseId: configuredDatabase ||
+    (configuredProject && configuredProject !== firebaseConfig.projectId ? '(default)' : firebaseConfig.firestoreDatabaseId) ||
+    '(default)',
+};
 
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
 const serverDb = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
@@ -157,7 +171,7 @@ async function getPublicPublishedArticles(): Promise<any[]> {
 
     const now = new Date();
     let filtered = pubList.filter((b: any) => {
-      if (!b.title || !b.id) return false;
+      if (!b.title || !b.id || !hasReadableArticleBody(b)) return false;
       const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
       if (pubDate > now) return false;
       return true;
@@ -1018,3 +1032,4 @@ async function startServer() {
 }
 
 startServer();
+
