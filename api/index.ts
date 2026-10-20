@@ -6,7 +6,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where, deleteDoc } from 'firebase/firestore';
 
 dotenv.config();
 
@@ -792,7 +792,7 @@ function startServer() {
 
         const articlesHtml = articles.map(art => {
           const coverImageId = art.sections?.[0]?.imageId || "";
-          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : '';
           return `
             <article class="blog-card" style="margin-bottom: 2rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
               <img src="${coverUrl}" alt="${art.title}" style="width:100%; max-height:300px; object-fit: cover; border-radius: 0.5rem;" />
@@ -886,7 +886,7 @@ function startServer() {
       const postTitle = blogData.title || "Untitled Article";
       const postSummary = blogData.summary || "Bespoke Editorial Article";
       const coverImageId = blogData.sections?.[0]?.imageId || "";
-      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : '';
       const publishedDateIso = new Date(blogData.createdAt || Date.now()).toISOString();
       const modifiedDateIso = new Date(blogData.updatedAt || Date.now()).toISOString();
       const authorName = blogData.authorName || 'Official Editor';

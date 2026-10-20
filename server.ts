@@ -6,7 +6,7 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { GoogleGenAI, Type } from '@google/genai';
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, getDocs, query, orderBy, where, deleteDoc } from 'firebase/firestore';
 
 dotenv.config();
 
@@ -232,8 +232,8 @@ app.get('/api/images/:id/public', async (req, res) => {
 
     const data = snapshot.data();
     
-    // Check if visibility is public (strictly obey visibility rules)
-    if (data.visibility !== 'public') {
+    // Check if visibility is private (allow public or default/unspecified visibility)
+    if (data.visibility === 'private') {
       res.status(403).json({ error: 'Access denied: This image is private' });
       return;
     }
@@ -263,6 +263,82 @@ app.get('/api/images/:id/public', async (req, res) => {
   } catch (error: any) {
     console.error('Error fetching image public binary:', error);
     res.status(500).json({ error: 'Internal server error', details: error.message });
+  }
+});
+
+// Paginated public images endpoint (default 8 items per page)
+app.get('/api/public/images', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string || '1', 10));
+    const limit = Math.max(1, parseInt(req.query.limit as string || '8', 10));
+    const tag = (req.query.tag || req.query.filter || 'all') as string;
+    const search = ((req.query.search || '') as string).toLowerCase().trim();
+
+    const imgCol = collection(serverDb, 'images');
+    const snapshot = await getDocs(imgCol);
+    let allImages = snapshot.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: data.title || 'Untitled Image',
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        visibility: data.visibility || 'public',
+        ratio: data.ratio || '16:9',
+        createdAt: data.createdAt || new Date(0).toISOString(),
+        ownerId: data.ownerId || '',
+        imageUrl: `/api/images/${d.id}/public`,
+      };
+    });
+
+    // Exclude strictly private images
+    allImages = allImages.filter(img => img.visibility !== 'private');
+
+    // Filter by tag/category if requested
+    if (tag && tag !== 'all') {
+      const lowerTag = tag.toLowerCase();
+      const TAG_MAP: Record<string, string[]> = {
+        travel: ['travel', '여행', '해변', '자연공원', '도시'],
+        product: ['product', '제품', '쇼핑몰', '쇼핑몰 상세 이미지', 'shopping'],
+        fashion: ['fashion', '패션', '화장품', '모델'],
+        cafe: ['cafe', '카페', '음식', '주방', 'food'],
+        sports: ['sports', '스포츠', '파크골프', 'golf'],
+        realestate: ['부동산', '금융', '사무실'],
+        health: ['health', '건강', '생활']
+      };
+      const matchWords = TAG_MAP[lowerTag] || [lowerTag];
+      allImages = allImages.filter(img =>
+        matchWords.some(w => 
+          img.tags.some((t: string) => t.toLowerCase().includes(w.toLowerCase())) ||
+          img.title.toLowerCase().includes(w.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by search query if requested
+    if (search) {
+      allImages = allImages.filter(img =>
+        img.title.toLowerCase().includes(search) ||
+        img.tags.some((t: string) => t.toLowerCase().includes(search))
+      );
+    }
+
+    // Sort by createdAt desc
+    allImages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const total = allImages.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginatedImages = allImages.slice((page - 1) * limit, page * limit);
+
+    res.status(200).json({
+      total,
+      page,
+      limit,
+      totalPages,
+      images: paginatedImages
+    });
+  } catch (error: any) {
+    console.error("Failed to fetch public images:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -688,7 +764,7 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   let viteInstance: any = null;
 
-  if (process.env.NODE_ENV !== 'production' && process.env.DISABLE_HMR !== 'true' && !process.env.VERCEL) {
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
     const { createServer: createViteServer } = await import('vite');
     viteInstance = await createViteServer({
       server: { middlewareMode: true },
@@ -811,7 +887,7 @@ async function startServer() {
 
         const articlesHtml = articles.map(art => {
           const coverImageId = art.sections?.[0]?.imageId || "";
-          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : `${CANONICAL_BASE_URL}/api/images/img_espresso_minimal/public`;
+          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : '';
           return `
             <article class="blog-card" style="margin-bottom: 2rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
               <img src="${coverUrl}" alt="${art.title}" style="width:100%; max-height:300px; object-fit: cover; border-radius: 0.5rem;" />
@@ -905,7 +981,7 @@ async function startServer() {
       const postTitle = blogData.title || "Untitled Article";
       const postSummary = blogData.summary || "Bespoke Editorial Article";
       const coverImageId = blogData.sections?.[0]?.imageId || "";
-      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : `${CANONICAL_BASE_URL}/api/images/img_espresso_minimal/public`;
+      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : '';
       const publishedDateIso = new Date(blogData.createdAt || Date.now()).toISOString();
       const modifiedDateIso = new Date(blogData.updatedAt || Date.now()).toISOString();
       const authorName = blogData.authorName || 'Official Editor';
@@ -1011,7 +1087,7 @@ async function startServer() {
     }
   });
 
-  if (process.env.NODE_ENV === 'production' || process.env.DISABLE_HMR === 'true') {
+  if (process.env.NODE_ENV === 'production') {
     // In production/sandbox, serve static compiled assets
     const distPath = path.resolve(__dirname, './dist');
     app.use(express.static(distPath));

@@ -152,182 +152,9 @@ const SITE_THEMES: Record<string, ThemeConfig> = {
   }
 };
 
-// Preset images for Seeding so the Hub has contents on start
-const SEED_IMAGES = [
-  {
-    id: "img_iceland_cabin",
-    title: "아이슬란드 검은 모래 해변의 외딴 오두막",
-    tags: ["travel", "iceland", "nordic", "scenic", "nature"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e293b'/><stop offset='100%' stop-color='%230f172a'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g1)'/><circle cx='400' cy='250' r='100' fill='%2338bdf8' opacity='0.2'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f8fafc' font-family='sans-serif' font-size='26' font-weight='bold'>아이슬란드 검은 모래 해변</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='monospace' font-size='14'>#iceland #nordic #nature</text></svg>",
-    url: "/api/images/img_iceland_cabin/public",
-    ratio: "16:9",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_espresso_minimal",
-    title: "미니멀리스트 브루잉 에스프레소 세트",
-    tags: ["product", "coffee", "minimal", "interior", "brand"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2378350f'/><stop offset='100%' stop-color='%23451a03'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g2)'/><circle cx='400' cy='250' r='100' fill='%23fbbf24' opacity='0.15'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23fef3c7' font-family='sans-serif' font-size='26' font-weight='bold'>미니멀리스트 에스프레소 세트</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d97706' font-family='monospace' font-size='14'>#product #coffee #minimal</text></svg>",
-    url: "/api/images/img_espresso_minimal/public",
-    ratio: "4:3",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_kyoto_path",
-    title: "교토 대나무 숲길과 흐르는 빛",
-    tags: ["travel", "kyoto", "japan", "forest", "peaceful"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23064e3b'/><stop offset='100%' stop-color='%23022c22'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g3)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23ecfdf5' font-family='sans-serif' font-size='26' font-weight='bold'>교토 대나무 숲길과 빛</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%236ee7b7' font-family='monospace' font-size='14'>#travel #kyoto #japan</text></svg>",
-    url: "/api/images/img_kyoto_path/public",
-    ratio: "16:9",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_ceramic_vase",
-    title: "따뜻한 테라코타 질감의 수제 도자기 화병",
-    tags: ["product", "artisan", "ceramic", "craft", "interior"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g4' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%239a3412'/><stop offset='100%' stop-color='%237c2d12'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g4)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23ffedd5' font-family='sans-serif' font-size='26' font-weight='bold'>수제 도자기 테라코타 화병</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23fdba74' font-family='monospace' font-size='14'>#product #ceramic #craft</text></svg>",
-    url: "/api/images/img_ceramic_vase/public",
-    ratio: "3:4",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_swiss_train",
-    title: "알프스 설산을 지나는 빨간 열차",
-    tags: ["travel", "switzerland", "alps", "scenic", "winter"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g5' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%23172554'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g5)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23eff6ff' font-family='sans-serif' font-size='26' font-weight='bold'>알프스 설산 베르니나 열차</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%2393c5fd' font-family='monospace' font-size='14'>#travel #alps #switzerland</text></svg>",
-    url: "/api/images/img_swiss_train/public",
-    ratio: "16:9",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_leather_notebook",
-    title: "황동 펜과 빈티지 가죽 노매드 다이어리",
-    tags: ["product", "stationery", "leather", "classic", "analog"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g6' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23451a03'/><stop offset='100%' stop-color='%23292524'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g6)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f5f5f4' font-family='sans-serif' font-size='26' font-weight='bold'>빈티지 가죽 노매드 다이어리</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d6d3d1' font-family='monospace' font-size='14'>#product #leather #analog</text></svg>",
-    url: "/api/images/img_leather_notebook/public",
-    ratio: "1:1",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_tokyo_night",
-    title: "신주쿠 골목길의 네온사인과 비 내리는 날",
-    tags: ["travel", "tokyo", "cyberpunk", "night", "neon"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g7' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23581c87'/><stop offset='100%' stop-color='%233b0764'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g7)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23faf5ff' font-family='sans-serif' font-size='26' font-weight='bold'>신주쿠 야간 네온사인 거리</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d8b4fe' font-family='monospace' font-size='14'>#travel #tokyo #neon</text></svg>",
-    url: "/api/images/img_tokyo_night/public",
-    ratio: "4:3",
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "img_linen_shirt",
-    title: "유기농 린넨 오버사이즈 서머 셔츠",
-    tags: ["product", "fashion", "linen", "natural", "minimal"],
-    visibility: "public",
-    ownerId: "system_curator",
-    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g8' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2378716c'/><stop offset='100%' stop-color='%2344403c'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g8)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f5f5f4' font-family='sans-serif' font-size='26' font-weight='bold'>유기농 린넨 오버사이즈 셔츠</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23a8a29e' font-family='monospace' font-size='14'>#product #fashion #linen</text></svg>",
-    url: "/api/images/img_linen_shirt/public",
-    ratio: "3:4",
-    createdAt: new Date().toISOString()
-  }
-];
 
-// Fallback high-fidelity seed articles shown when the Firestore database is empty or offline
-const SEED_BLOGS = [
-  {
-    id: "seed_blog_product",
-    title: "정제된 형태와 본질적 유용성: 미니멀 브루잉 세트",
-    summary: "도심 속 바쁜 일상에서 벗어나, 매일 아침 오감을 일깨우는 에스프레소 브루잉 리추얼의 아름다움과 도구 디자인에 대한 심층적 탐구.",
-    sections: [
-      {
-        title: "도구가 제안하는 아침의 정적",
-        imageId: "img_espresso_minimal",
-        imageCaption: "황동 필터와 무광 세라믹 바디가 조화를 이루는 프리미엄 브루잉 기어",
-        content: "모든 것이 빠르게 스쳐 지나가는 도심 속에서 매일 아침 단 10분간 에스프레소를 브루잉하는 시간은 단순한 음용을 넘어 오롯이 나에게 집중하는 리추얼이 됩니다. 이 세트는 미니멀한 실루엣 뒤에 가려진 정밀한 유용성으로 정교한 추출 경험을 설계합니다."
-      },
-      {
-        title: "오가닉 촉감과 디테일의 완성",
-        imageId: "img_ceramic_vase",
-        imageCaption: "핸드메이드 세라믹 표면의 자연스러운 크랙과 빈티지 마감",
-        content: "손끝에 닿는 자연스러운 흙의 질감은 금속 기기가 주지 못하는 따뜻한 아날로그적 온기를 불어넣습니다. 정밀한 물줄기 제어와 일정한 온도 유지를 돕는 디테일들은 전문가 에디터들이 매일 아침 극찬하는 요소이기도 합니다."
-      }
-    ],
-    status: "published",
-    ownerId: "system_curator",
-    tone: "Informative",
-    themePersona: "hub3",
-    seoTags: ["미니멀", "홈카페", "세라믹"],
-    metaDescription: "정제된 형태와 본질적 유용성을 추구하는 프리미엄 미니멀리스트 브루잉 에스프레소 세트의 에디토리얼 사용기 및 디자인 탐구.",
-    updatedAt: "2026-10-05T20:00:00.000Z",
-    createdAt: "2026-10-05T20:00:00.000Z"
-  },
-  {
-    id: "seed_blog_lifestyle",
-    title: "교토의 새벽, 대나무 숲길에서 마주한 온전한 평정",
-    summary: "빛과 바람이 머무는 곳, 아침 안개 속에 숨겨진 자연의 흐름을 따라 걸으며 머릿속 복잡한 생각들을 내려놓는 치유의 시간.",
-    sections: [
-      {
-        title: "바람의 소리에 귀 기울이는 법",
-        imageId: "img_kyoto_path",
-        imageCaption: "초록빛 안개가 내려앉은 이른 아침의 사가노 대나무 숲길",
-        content: "군중이 몰려들기 전 이른 새벽의 교토 대나무 숲길은 오직 대나무 잎사귀들이 서로 부딪히는 바스락거리는 소리와 바람 소리만이 가득합니다. 한 걸음씩 내딛을 때마다 가슴 깊은 곳까지 청량한 공기가 채워지며 가벼운 카타르시스를 느끼게 됩니다."
-      },
-      {
-        title: "시간이 멈춘 듯한 골목의 정취",
-        imageId: "img_tokyo_night",
-        imageCaption: "골목길마다 자리 잡은 고즈넉한 등불과 아늑한 공간들",
-        content: "자연의 신비에서 깨어나 도심의 뒤안길을 걷다 보면, 작은 다도실과 핸드드립 카페들이 길을 밝힙니다. 지역 에디터들과 라이프스타일 큐레이터들이 공간 마케팅의 정수로 손꼽는 이 공간들은 지친 현대인에게 작은 마음의 안식처를 내어줍니다."
-      }
-    ],
-    status: "published",
-    ownerId: "system_curator",
-    tone: "Storytelling",
-    themePersona: "hub4",
-    seoTags: ["교토여행", "힐링", "대나무숲"],
-    metaDescription: "교토 사가노 대나무 숲길의 이른 아침을 거닐며 찾은 현대인의 온전한 평정과 느린 여행 가이드.",
-    updatedAt: "2026-10-05T21:00:00.000Z",
-    createdAt: "2026-10-05T21:00:00.000Z"
-  },
-  {
-    id: "seed_blog_magazine",
-    title: "설산의 경계를 달리는 붉은 열차: 알프스의 낭만",
-    summary: "새하얀 캔버스 위에 그려지는 붉은색 한 줄기 선, 스위스 베르니나 특급 열차를 타고 만나는 만년설과 차가운 공기 속 아날로그 여행의 깊이.",
-    sections: [
-      {
-        title: "만년설이 그린 장엄한 프레임",
-        imageId: "img_swiss_train",
-        imageCaption: "만년설의 능선을 가로지르며 겨울의 낭만을 선사하는 스위스 기차",
-        content: "창밖으로 펼쳐지는 비현실적인 높이의 설산과 거대한 빙하는 보는 이로 하여금 경외감을 불러일으킵니다. 차가운 유리창 너머로 따사롭게 스며드는 햇살과 아날로그적인 기차의 덜컹거림은 속도 중심의 일상에서 벗어난 느림의 여행이 선사하는 특권입니다."
-      },
-      {
-        title: "차가운 오감 묘사와 감성의 교차",
-        imageId: "img_iceland_cabin",
-        imageCaption: "적막함 속에 포근함을 전하는 혹한기 오두막의 실루엣",
-        content: "문명을 떠나 차가운 대지 위에 굳건히 서 있는 아늑한 보금자리는 고독의 긍정적인 힘을 생각하게 만듭니다. 따뜻한 허브티 한 잔과 빈티지 다이어리 한 권만 있다면, 그 어디든 나만의 영혼을 치유하는 글쓰기 작업실이 탄생합니다."
-      }
-    ],
-    status: "published",
-    ownerId: "system_curator",
-    tone: "Elegant",
-    themePersona: "hub2",
-    seoTags: ["스위스", "알프스", "기차여행"],
-    metaDescription: "만년설이 장엄하게 어우러진 알프스를 관통하는 빨간 기차와 혹한기 속 아늑한 오두막 에세이.",
-    updatedAt: "2026-10-05T22:00:00.000Z",
-    createdAt: "2026-10-05T22:00:00.000Z"
-  }
-];
+
+
 
 export default function App() {
   // Navigation & Routing state
@@ -351,8 +178,10 @@ export default function App() {
   const [displayNameInput, setDisplayNameInput] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
 
-  // Image Gallery state
+  // Image Gallery state (strictly 8 items per page)
   const [images, setImages] = useState<any[]>([]);
+  const [totalImagesCount, setTotalImagesCount] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [selectedImages, setSelectedImages] = useState<any[]>([]);
   const [gallerySearch, setGallerySearch] = useState<string>('');
   const [activeFilter, setActiveFilter] = useState<string>('all');
@@ -548,60 +377,66 @@ export default function App() {
     setIsAuthModalOpen(false); // Close auth modal
   };
 
-  // Retrieve images from database
-  const loadGalleryImages = async () => {
+  // Retrieve registered images from database with pagination (strictly 8 items per page)
+  const loadGalleryImages = async (page = galleryPage, filter = activeFilter, search = gallerySearch) => {
     setLoadingImages(true);
     try {
-      const imgCol = collection(db, 'images');
-      const q = query(imgCol, orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
-      const items = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      
-      if (items.length === 0) {
-        // If empty, supply preset local fallback seed images first
-        setImages(SEED_IMAGES);
-      } else {
-        setImages(items);
-      }
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: '8',
+        tag: filter,
+        search: search
+      });
+      const res = await fetch(`/api/public/images?${queryParams.toString()}`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setImages(data.images || []);
+      setTotalImagesCount(data.total || 0);
+      setTotalPages(data.totalPages || 1);
     } catch (err) {
-      console.warn("Failed to load firestore. Falling back to default preset images.", err);
-      setImages(SEED_IMAGES);
+      console.warn("Failed to fetch gallery images via server endpoint, falling back to direct Firestore:", err);
+      try {
+        const imgCol = collection(db, 'images');
+        const snapshot = await getDocs(imgCol);
+        let items = snapshot.docs.map(d => ({
+          id: d.id,
+          ...d.data(),
+          imageUrl: `/api/images/${d.id}/public`
+        })).filter((img: any) => img.visibility !== 'private');
+
+        if (filter !== 'all') {
+          const lowerFilter = filter.toLowerCase();
+          items = items.filter((img: any) =>
+            (img.tags || []).some((t: string) => t.toLowerCase().includes(lowerFilter)) ||
+            (img.title || '').toLowerCase().includes(lowerFilter)
+          );
+        }
+        if (search) {
+          const lowerSearch = search.toLowerCase();
+          items = items.filter((img: any) =>
+            (img.title || '').toLowerCase().includes(lowerSearch) ||
+            (img.tags || []).some((t: string) => t.toLowerCase().includes(lowerSearch))
+          );
+        }
+
+        setTotalImagesCount(items.length);
+        setTotalPages(Math.ceil(items.length / 8) || 1);
+        setImages(items.slice((page - 1) * 8, page * 8));
+      } catch (directErr) {
+        console.error("Direct Firestore read also failed:", directErr);
+        setImages([]);
+        setTotalImagesCount(0);
+        setTotalPages(1);
+      }
     } finally {
       setLoadingImages(false);
     }
   };
 
   useEffect(() => {
-    loadGalleryImages();
+    loadGalleryImages(1, 'all', '');
     loadActiveAd();
   }, []);
-
-  // Seeding trigger to easily populate Firestore with seed images
-  const triggerDatabaseSeeding = async () => {
-    try {
-      setLoadingImages(true);
-      for (const img of SEED_IMAGES) {
-        // We write to the common images collection
-        await setDoc(doc(db, 'images', img.id), {
-          title: img.title,
-          tags: img.tags,
-          visibility: img.visibility,
-          ownerId: img.ownerId,
-          dataUrl: img.dataUrl,
-          imageUrl: img.url,
-          ratio: img.ratio,
-          createdAt: new Date().toISOString()
-        });
-      }
-      alert("공통 이미지 허브 DB에 샘플 고화질 자산 8개가 성공적으로 주입되었습니다!");
-      loadGalleryImages();
-    } catch (err) {
-      console.error("Failed to seed database:", err);
-      alert("데이터 주입 중 권한 에러가 발생했습니다. 로컬 mock 모드로 동작합니다. 에러: " + String(err));
-    } finally {
-      setLoadingImages(false);
-    }
-  };
 
   // Google Login popup
   const handleGoogleLogin = async () => {
@@ -699,14 +534,8 @@ export default function App() {
     }
   };
 
-  // Filter and search logic on the client side
-  const filteredImages = images.filter(img => {
-    const matchesSearch = img.title?.toLowerCase().includes(gallerySearch.toLowerCase()) || 
-                          img.tags?.some((t: string) => t.toLowerCase().includes(gallerySearch.toLowerCase()));
-    
-    if (activeFilter === 'all') return matchesSearch;
-    return matchesSearch && img.tags?.includes(activeFilter);
-  });
+  // Gallery images are paginated and filtered authoritatively by 8 units via /api/public/images
+  const filteredImages = images;
 
   // Load User Saved Blogs (Drafts + Published) - 로컬스토리지 대안 연동으로 403 권한 에러 해결
   const loadSavedBlogs = async () => {
@@ -1008,8 +837,8 @@ export default function App() {
 
   // Workflow Trigger: 10.1 Propose Planning
   const handleProposePlanning = async () => {
-    if (selectedImages.length < 2 || selectedImages.length > 5) {
-      alert("최상의 검색 노출 가독성을 보장하기 위해 2장 ~ 5장의 이미지를 선택해 주세요.");
+    if (selectedImages.length < 1 || selectedImages.length > 5) {
+      alert("블로그 발행을 위해 1장 ~ 5장의 이미지를 선택해 주세요.");
       return;
     }
     setIsGeneratingPlan(true);
@@ -1445,8 +1274,8 @@ export default function App() {
 
   // Quick navigation helpers
   const startStudioWithSelections = () => {
-    if (selectedImages.length < 2) {
-      alert("네이버 / 구글 검색 최적화 블로그 제작을 위해 최소 2장 이상의 사진을 선택해 주세요.");
+    if (selectedImages.length < 1) {
+      alert("블로그 발행을 위해 최소 1장 이상의 사진을 선택해 주세요.");
       return;
     }
     if (selectedImages.length > 5) {
@@ -1458,32 +1287,31 @@ export default function App() {
   };
 
   // Render Section Images with Fallback Design Strategy (Zero-broken-image Policy)
-  const renderSectionImage = (imageId: string) => {
+  const renderSectionImage = (imageId: string, imageCaption?: string) => {
+    if (!imageId) return null;
     const mapped = images.find(img => img.id === imageId);
-    if (!mapped) {
-      return (
-        <div className="w-full aspect-video bg-stone-100 flex items-center justify-center border border-stone-200 rounded-lg">
-          <span className="text-xs text-stone-400">이미지 매핑 데이터 없음</span>
-        </div>
-      );
-    }
-    const publicPath = `/api/images/${mapped.id}/public`;
+    const publicPath = `/api/images/${imageId}/public`;
     return (
-      <div className="relative group overflow-hidden rounded-lg border border-stone-100 shadow-sm">
+      <div className="relative group overflow-hidden rounded-xl border border-stone-200/80 shadow-sm my-4 bg-stone-100">
         <img 
           src={publicPath} 
           onError={(e) => {
-            // Fallback to absolute unsplash url if backend path fails or not seeded
-            e.currentTarget.src = mapped.imageUrl || mapped.url;
+            if (mapped?.imageUrl && e.currentTarget.src !== mapped.imageUrl) {
+              e.currentTarget.src = mapped.imageUrl;
+            } else {
+              e.currentTarget.style.display = 'none';
+            }
           }}
-          alt={mapped.title} 
+          alt={imageCaption || mapped?.title || "기사 첨부 사진"} 
           referrerPolicy="no-referrer"
-          className="w-full max-h-[480px] object-cover transition-transform duration-500 group-hover:scale-101"
+          className="w-full max-h-[520px] object-cover transition-transform duration-500 group-hover:scale-101"
         />
-        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-4 text-white">
-          <p className="text-xs text-stone-300 font-serif italic">Photo by Curator</p>
-          <p className="text-sm font-medium leading-tight">{mapped.title}</p>
-        </div>
+        {(imageCaption || mapped?.title) && (
+          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-4 text-white">
+            <p className="text-[11px] text-stone-300 font-serif italic">Photo from Image Hub</p>
+            <p className="text-sm font-medium leading-tight">{imageCaption || mapped?.title}</p>
+          </div>
+        )}
       </div>
     );
   };
@@ -1689,7 +1517,8 @@ export default function App() {
             <div className="relative rounded-2xl overflow-hidden bg-stone-950 text-white shadow-md border border-stone-800 p-8 md:p-14">
               <div className="absolute inset-0 opacity-20">
                 <img 
-                  src="/api/images/img_kyoto_path/public" 
+                  src={images[0]?.id ? `/api/images/${images[0].id}/public` : (publicArticles[0]?.sections?.[0]?.imageId ? `/api/images/${publicArticles[0].sections[0].imageId}/public` : '')} 
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-full h-full object-cover filter brightness-75 contrast-105"
                   alt="Webzine cover background"
                 />
@@ -1820,8 +1649,7 @@ export default function App() {
                     .filter(article => archiveFilter === 'all' || article.themePersona === archiveFilter)
                     .map((article: any) => {
                       const firstImageId = article.sections?.[0]?.imageId;
-                      const matchedImage = images.find(img => img.id === firstImageId);
-                      const coverSrc = matchedImage ? `/api/images/${matchedImage.id}/public` : (matchedImage?.imageUrl || matchedImage?.url || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80');
+                      const coverSrc = firstImageId ? `/api/images/${firstImageId}/public` : (article.sections?.[0]?.imageUrl || '');
 
                       // Specific metadata & badges per genre
                       let genreTag = "매거진 블로그";
@@ -1849,7 +1677,7 @@ export default function App() {
                           <div className="relative aspect-[1.618/1] w-full bg-stone-50 rounded-xl overflow-hidden border border-stone-200/50">
                             <img 
                               src={coverSrc}
-                              onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80'; }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
                               alt={article.title}
                             />
@@ -1912,7 +1740,8 @@ export default function App() {
             <div className="relative rounded-2xl overflow-hidden bg-stone-900 text-white shadow-md border border-white/5 p-8 md:p-12">
               <div className="absolute inset-0 opacity-40">
                 <img 
-                  src={activeSiteId === 'hub2' ? '/src/assets/images/hero_coastal_magazine_1790918643122.jpg' : '/src/assets/images/product_minimal_leather_1790918654979.jpg'} 
+                  src={images[0]?.id ? `/api/images/${images[0].id}/public` : (publicArticles[0]?.sections?.[0]?.imageId ? `/api/images/${publicArticles[0].sections[0].imageId}/public` : '')} 
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   className="w-full h-full object-cover filter saturate-75 contrast-105"
                   alt="Feature banner"
                 />
@@ -1929,24 +1758,19 @@ export default function App() {
                 <div className="flex flex-wrap gap-3 pt-2">
                   <button 
                     onClick={() => {
-                      // Trigger mock or seed data populate to make sure there are items
-                      triggerDatabaseSeeding();
-                    }}
-                    className="px-4 py-2 text-xs font-medium bg-white text-stone-900 rounded-lg hover:bg-stone-100 transition-colors shadow-sm whitespace-nowrap"
-                  >
-                    이미지 허브 자산 주입 (Seeding)
-                  </button>
-                  <button 
-                    onClick={() => {
                       if (images.length > 0) {
-                        setSelectedImages([images[0], images[1], images[3]].filter(Boolean));
-                        alert("예시 여행 & 제품 기획용 이미지 3개가 즉시 트레이에 선택되었습니다!");
+                        setSelectedImages(images.slice(0, Math.min(3, images.length)));
+                        alert(`허브 등록 이미지 ${Math.min(3, images.length)}개가 즉시 트레이에 선택되었습니다!`);
                       }
                     }}
                     className="px-4 py-2 text-xs font-medium bg-white/15 hover:bg-white/25 border border-white/20 text-white rounded-lg transition-colors whitespace-nowrap"
                   >
-                    에디터 추천 묶음 자동 선택
+                    등록 이미지 자동 묶음 선택
                   </button>
+                  <span className="text-xs font-mono px-3 py-2 bg-black/30 border border-white/10 rounded-lg text-emerald-400 font-bold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    DB 허브 등록 자산: 총 {totalImagesCount}개 (8개 단위 페이징)
+                  </span>
                 </div>
               </div>
             </div>
@@ -1954,15 +1778,28 @@ export default function App() {
             {/* Gallery Control Bar */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-200/60 pb-6">
               
-              {/* Interactive filters - button style is allowed */}
+              {/* Interactive filters matching DB tags */}
               <div className="flex flex-wrap items-center gap-2">
-                {['all', 'travel', 'product', 'minimal', 'interior', 'fashion'].map((filterVal) => (
+                {[
+                  { id: 'all', label: '전체 보기' },
+                  { id: 'travel', label: '#여행' },
+                  { id: 'product', label: '#제품/쇼핑' },
+                  { id: 'fashion', label: '#패션/뷰티' },
+                  { id: 'cafe', label: '#카페/음식' },
+                  { id: 'sports', label: '#골프/스포츠' },
+                  { id: 'realestate', label: '#부동산/금융' },
+                  { id: 'health', label: '#건강/생활' }
+                ].map((cat) => (
                   <button
-                    key={filterVal}
-                    onClick={() => { setActiveFilter(filterVal); setGalleryPage(1); }}
-                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all capitalize ${activeFilter === filterVal ? 'bg-neutral-900 text-white shadow-sm' : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950'}`}
+                    key={cat.id}
+                    onClick={() => {
+                      setActiveFilter(cat.id);
+                      setGalleryPage(1);
+                      loadGalleryImages(1, cat.id, gallerySearch);
+                    }}
+                    className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${activeFilter === cat.id ? 'bg-neutral-900 text-white shadow-sm font-bold' : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950'}`}
                   >
-                    {filterVal === 'all' ? '전체 보기' : `#${filterVal}`}
+                    {cat.label}
                   </button>
                 ))}
               </div>
@@ -1973,9 +1810,14 @@ export default function App() {
                 <input 
                   type="text" 
                   value={gallerySearch}
-                  onChange={(e) => { setGallerySearch(e.target.value); setGalleryPage(1); }}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setGallerySearch(val);
+                    setGalleryPage(1);
+                    loadGalleryImages(1, activeFilter, val);
+                  }}
                   placeholder="사진 제목 또는 태그 검색..."
-                  className="w-full pl-9 pr-4 py-2 text-xs bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-neutral-900"
+                  className="w-full pl-9 pr-4 py-2 text-xs bg-white border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-neutral-900 font-sans"
                 />
               </div>
 
@@ -1985,20 +1827,27 @@ export default function App() {
             {loadingImages ? (
               <div className="flex flex-col items-center justify-center py-24 space-y-3">
                 <Loader2 className="w-8 h-8 animate-spin text-neutral-500" />
-                <p className="text-xs text-neutral-400 font-mono">이미지 저장소 연결 상태 확인 중...</p>
+                <p className="text-xs text-neutral-400 font-mono">이미지 허브 데이터베이스에서 실시간 동기화 중...</p>
               </div>
-            ) : filteredImages.length === 0 ? (
-              <div className="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-300 p-8">
-                <ImageIcon className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-neutral-600">선택한 조건에 일치하는 이미지가 허브에 없습니다.</p>
-                <p className="text-xs text-neutral-400 mt-1 mb-4">공동 이미지 허브 자산을 데이터베이스에 주입하여 즉시 체험해 보세요.</p>
-                <button onClick={triggerDatabaseSeeding} className={theme.buttonClass + " px-4 py-2 rounded-lg text-xs"}>
-                  초기 이미지 자산 주입하기
+            ) : images.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-xl border border-dashed border-neutral-300 p-8 space-y-3">
+                <ImageIcon className="w-10 h-10 text-neutral-300 mx-auto" />
+                <p className="text-sm font-medium text-neutral-600">선택한 태그/검색 조건에 일치하는 등록 이미지가 없습니다.</p>
+                <button 
+                  onClick={() => {
+                    setActiveFilter('all');
+                    setGallerySearch('');
+                    setGalleryPage(1);
+                    loadGalleryImages(1, 'all', '');
+                  }} 
+                  className={theme.buttonClass + " px-4 py-2 rounded-lg text-xs"}
+                >
+                  전체 목록으로 돌아가기
                 </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {filteredImages.slice((galleryPage - 1) * 8, galleryPage * 8).map((img) => {
+                {images.map((img) => {
                   const isSelected = selectedImages.some(i => i.id === img.id);
                   return (
                     <div 
@@ -2008,17 +1857,19 @@ export default function App() {
                       {/* Image Frame */}
                       <div className="relative aspect-square bg-neutral-100 overflow-hidden cursor-pointer" onClick={() => toggleImageSelection(img)}>
                         <img 
-                          src={`/api/images/${img.id}/public`} 
+                          src={img.imageUrl || `/api/images/${img.id}/public`} 
                           onError={(e) => {
-                            e.currentTarget.src = img.imageUrl || img.url;
+                            if (img.dataUrl && e.currentTarget.src !== img.dataUrl) {
+                              e.currentTarget.src = img.dataUrl;
+                            }
                           }}
                           alt={img.title} 
                           referrerPolicy="no-referrer"
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
                         />
                         <div className="absolute top-2 right-2 flex items-center gap-1.5">
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-medium tracking-tight shadow-sm ${img.visibility === 'public' ? 'bg-emerald-500 text-white' : 'bg-neutral-800 text-white'}`}>
-                            {img.visibility === 'public' ? '공개' : '비공개'}
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-medium tracking-tight shadow-sm ${img.visibility === 'public' || !img.visibility ? 'bg-emerald-500 text-white' : 'bg-neutral-800 text-white'}`}>
+                            공개
                           </span>
                           {isSelected && (
                             <div className="w-5 h-5 rounded-full bg-neutral-900 text-white flex items-center justify-center shadow">
@@ -2028,23 +1879,23 @@ export default function App() {
                         </div>
                       </div>
 
-                      {/* Detail metadata - Unboxed subtle style */}
+                      {/* Detail metadata */}
                       <div className="p-4 space-y-2">
-                        <h4 className="text-sm font-semibold text-neutral-800 line-clamp-1">{img.title || '무제 이미지'}</h4>
+                        <h4 className="text-sm font-semibold text-neutral-800 line-clamp-1">{img.title || '등록 이미지'}</h4>
                         
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          {img.tags?.map((t: string) => (
+                          {(img.tags || []).slice(0, 3).map((t: string) => (
                             <span key={t} className="text-[11px] text-neutral-500">#{t}</span>
                           ))}
                         </div>
 
-                        {/* Visual ratios/metadata without pill box wrapping */}
+                        {/* Visual ratios/metadata */}
                         <div className="flex items-center justify-between text-[11px] text-neutral-400 pt-2 border-t border-neutral-100 font-mono">
                           <span>비율 {img.ratio || '16:9'}</span>
-                          <span>ID: {img.id.substring(4, 12)}</span>
+                          <span>ID: {img.id.substring(0, 10)}</span>
                         </div>
 
-                        {/* Interactive affordances for individual images */}
+                        {/* Interactive affordances */}
                         <div className="flex items-center gap-2 pt-2">
                           <button 
                             onClick={() => handleCopyLink(img.id)}
@@ -2054,7 +1905,7 @@ export default function App() {
                             {copiedId === img.id ? '복사 완료' : '링크 복사'}
                           </button>
                           <a 
-                            href={img.imageUrl || img.url} 
+                            href={`/api/images/${img.id}/public`} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="p-1.5 rounded bg-neutral-50 hover:bg-neutral-100 text-neutral-600 transition-colors"
@@ -2070,24 +1921,60 @@ export default function App() {
               </div>
             )}
 
-            {/* Pagination Controls */}
-            {filteredImages.length > 8 && (
-              <div className="flex items-center justify-center gap-2 pt-4">
-                <button
-                  onClick={() => setGalleryPage(prev => Math.max(1, prev - 1))}
-                  disabled={galleryPage === 1}
-                  className="p-2 border border-neutral-200 rounded-lg hover:bg-neutral-100 disabled:opacity-50"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                </button>
-                <span className="text-xs font-mono text-neutral-500">Page {galleryPage} of {Math.ceil(filteredImages.length / 8)}</span>
-                <button
-                  onClick={() => setGalleryPage(prev => Math.min(Math.ceil(filteredImages.length / 8), prev + 1))}
-                  disabled={galleryPage === Math.ceil(filteredImages.length / 8)}
-                  className="p-2 border border-neutral-200 rounded-lg hover:bg-neutral-100 disabled:opacity-50"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+            {/* Pagination Controls (Strictly 8 units per page) */}
+            {totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-neutral-200">
+                <div className="text-xs font-mono text-neutral-500">
+                  총 <strong className="text-neutral-900 font-bold">{totalImagesCount}</strong>개 이미지 허브 등록 자산 (페이지 <strong className="text-neutral-900">{galleryPage}</strong> / <strong>{totalPages}</strong>)
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      const p = Math.max(1, galleryPage - 1);
+                      setGalleryPage(p);
+                      loadGalleryImages(p, activeFilter, gallerySearch);
+                    }}
+                    disabled={galleryPage <= 1}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-40 transition-colors"
+                  >
+                    ← 이전 8개
+                  </button>
+
+                  {Array.from({ length: Math.min(7, totalPages) }, (_, idx) => {
+                    let pageNum = idx + 1;
+                    if (totalPages > 7) {
+                      if (galleryPage > 4 && galleryPage < totalPages - 2) {
+                        pageNum = galleryPage - 3 + idx;
+                      } else if (galleryPage >= totalPages - 2) {
+                        pageNum = totalPages - 6 + idx;
+                      }
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => {
+                          setGalleryPage(pageNum);
+                          loadGalleryImages(pageNum, activeFilter, gallerySearch);
+                        }}
+                        className={`w-8 h-8 rounded-lg text-xs font-mono font-bold transition-all ${galleryPage === pageNum ? 'bg-neutral-900 text-white shadow-sm' : 'border border-neutral-200 hover:bg-neutral-100 text-neutral-700'}`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => {
+                      const p = Math.min(totalPages, galleryPage + 1);
+                      setGalleryPage(p);
+                      loadGalleryImages(p, activeFilter, gallerySearch);
+                    }}
+                    disabled={galleryPage >= totalPages}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-neutral-200 hover:bg-neutral-100 disabled:opacity-40 transition-colors"
+                  >
+                    다음 8개 →
+                  </button>
+                </div>
               </div>
             )}
 
@@ -2231,8 +2118,7 @@ export default function App() {
                     .map((article: any) => {
                       // Dynamic Cover image or default
                       const firstImageId = article.sections?.[0]?.imageId;
-                      const matchedImage = images.find(img => img.id === firstImageId);
-                      const coverSrc = matchedImage ? `/api/images/${matchedImage.id}/public` : (matchedImage?.imageUrl || matchedImage?.url || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80');
+                      const coverSrc = firstImageId ? `/api/images/${firstImageId}/public` : (article.sections?.[0]?.imageUrl || '');
 
                       // Elegant colored labels
                       let genreLabel = "에세이";
@@ -2257,7 +2143,7 @@ export default function App() {
                           <div className="relative aspect-[1.618/1] w-full bg-stone-100 rounded-xl overflow-hidden border border-stone-200/50">
                             <img 
                               src={coverSrc}
-                              onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80'; }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
                               alt={article.title}
                             />
@@ -2397,23 +2283,135 @@ export default function App() {
             {studioStep === 1 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                {/* Image overview column */}
+                {/* Image overview & Selection column */}
                 <div className="lg:col-span-1 space-y-4">
-                  <h3 className="text-sm font-semibold text-neutral-800 uppercase tracking-wider">기획에 사용될 이미지 ({selectedImages.length}장)</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {selectedImages.map((img) => (
-                      <div key={img.id} className="relative aspect-video rounded-lg overflow-hidden border border-neutral-200">
-                        <img 
-                          src={`/api/images/${img.id}/public`} 
-                          onError={(e) => { e.currentTarget.src = img.imageUrl || img.url; }}
-                          className="w-full h-full object-cover" 
-                          alt="selected" 
-                        />
-                        <div className="absolute bottom-1 left-1 bg-black/60 px-1.5 py-0.5 rounded text-[8px] text-white font-mono">
-                          {img.id.substring(4, 12)}
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-neutral-800 uppercase tracking-wider">
+                      발행용 이미지 ({selectedImages.length}장 / 최대 5장)
+                    </h3>
+                    {selectedImages.length > 0 && (
+                      <button 
+                        type="button" 
+                        onClick={() => setSelectedImages([])} 
+                        className="text-[11px] text-red-500 hover:underline cursor-pointer"
+                      >
+                        선택 초기화
+                      </button>
+                    )}
+                  </div>
+
+                  {selectedImages.length === 0 ? (
+                    <div className="p-4 rounded-xl border border-dashed border-amber-300 bg-amber-50/60 text-center space-y-2">
+                      <ImageIcon className="w-8 h-8 text-amber-500 mx-auto" />
+                      <p className="text-xs font-bold text-amber-900">선택된 이미지가 없습니다.</p>
+                      <p className="text-[11px] text-amber-700 leading-relaxed">
+                        블로그를 발행할 이미지를 아래 허브 갤러리에서 클릭하여 1장~5장 선택해 주세요.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (images.length > 0) {
+                            setSelectedImages(images.slice(0, Math.min(3, images.length)));
+                          }
+                        }}
+                        className="px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                      >
+                        추천 이미지 자동 선택
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {selectedImages.map((img) => (
+                        <div key={img.id} className="relative aspect-video rounded-lg overflow-hidden border border-neutral-300 group shadow-sm bg-stone-100">
+                          <img 
+                            src={`/api/images/${img.id}/public`} 
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            className="w-full h-full object-cover" 
+                            alt={img.title} 
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImages(prev => prev.filter(i => i.id !== img.id))}
+                            className="absolute top-1 right-1 w-5 h-5 bg-black/70 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-90 group-hover:opacity-100 transition-colors cursor-pointer"
+                            title="이미지 제거"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                          <div className="absolute bottom-0 inset-x-0 bg-black/60 px-1.5 py-0.5 text-[9px] text-white font-mono truncate">
+                            {img.title || img.id.substring(0, 10)}
+                          </div>
                         </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Interactive Image Hub Browser inside Step 1 */}
+                  <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-stone-800">허브 등록 이미지 ({totalImagesCount}개)</span>
+                      <span className="text-[10px] font-mono text-stone-500">{galleryPage} / {totalPages} 페이지</span>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {images.map(img => {
+                        const isSelected = selectedImages.some(i => i.id === img.id);
+                        return (
+                          <div
+                            key={img.id}
+                            onClick={() => toggleImageSelection(img)}
+                            className={`relative aspect-square rounded-md overflow-hidden border-2 cursor-pointer transition-all ${
+                              isSelected ? 'border-emerald-600 ring-2 ring-emerald-600/40 scale-95' : 'border-stone-200 hover:border-stone-400'
+                            }`}
+                            title={img.title}
+                          >
+                            <img 
+                              src={`/api/images/${img.id}/public`} 
+                              alt={img.title} 
+                              className="w-full h-full object-cover"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                            {isSelected && (
+                              <div className="absolute top-0.5 right-0.5 bg-emerald-600 text-white rounded-full p-0.5">
+                                <Check className="w-2.5 h-2.5" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* 8-item Pagination Controls inside Step 1 */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between pt-1 border-t border-stone-200 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const p = Math.max(1, galleryPage - 1);
+                            setGalleryPage(p);
+                            loadGalleryImages(p, activeFilter, gallerySearch);
+                          }}
+                          disabled={galleryPage <= 1}
+                          className="px-2 py-1 text-[11px] font-medium rounded bg-white border border-stone-200 hover:bg-stone-100 disabled:opacity-40 cursor-pointer"
+                        >
+                          ← 이전 8개
+                        </button>
+                        <span className="text-[11px] font-mono text-stone-600 font-bold">
+                          {galleryPage} / {totalPages}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const p = Math.min(totalPages, galleryPage + 1);
+                            setGalleryPage(p);
+                            loadGalleryImages(p, activeFilter, gallerySearch);
+                          }}
+                          disabled={galleryPage >= totalPages}
+                          className="px-2 py-1 text-[11px] font-medium rounded bg-white border border-stone-200 hover:bg-stone-100 disabled:opacity-40 cursor-pointer"
+                        >
+                          다음 8개 →
+                        </button>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -3197,8 +3195,7 @@ export default function App() {
                   .map((blog) => {
                     // Extract Thumbnail
                     const firstImageId = blog.sections?.[0]?.imageId;
-                    const matchedImage = images.find(img => img.id === firstImageId);
-                    const coverSrc = matchedImage ? `/api/images/${matchedImage.id}/public` : (matchedImage?.imageUrl || matchedImage?.url || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80');
+                    const coverSrc = firstImageId ? `/api/images/${firstImageId}/public` : (blog.sections?.[0]?.imageUrl || '');
 
                     // Genre specifics
                     let genreText = "매거진 에세이";
@@ -3221,7 +3218,7 @@ export default function App() {
                           <div className="relative aspect-[1.618/1] w-full rounded-xl overflow-hidden border border-stone-200/50 bg-stone-50">
                             <img 
                               src={coverSrc}
-                              onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80'; }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
                               className="w-full h-full object-cover transition-transform duration-750 group-hover:scale-102"
                               alt={blog.title}
                             />
@@ -3852,8 +3849,8 @@ export default function App() {
                           .filter(a => a.id !== readingBlog.id)
                           .slice(0, 2)
                           .map((rec: any) => {
-                            const matchedImg = images.find(img => img.id === rec.sections?.[0]?.imageId);
-                            const cover = matchedImg ? `/api/images/${matchedImg.id}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=300&auto=format&fit=crop&q=80';
+                            const firstImgId = rec.sections?.[0]?.imageId;
+                            const cover = firstImgId ? `/api/images/${firstImgId}/public` : (rec.sections?.[0]?.imageUrl || '');
                             
                             return (
                               <div 
@@ -3864,12 +3861,14 @@ export default function App() {
                                 }}
                                 className="group flex gap-3 p-3 bg-neutral-50/50 hover:bg-neutral-50 border border-neutral-200/60 rounded-xl cursor-pointer transition-all duration-300 items-center"
                               >
-                                <img 
-                                  src={cover} 
-                                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=300&auto=format&fit=crop&q=80'; }}
-                                  className="w-16 h-16 object-cover rounded-lg border border-neutral-200 flex-shrink-0" 
-                                  alt="rec" 
-                                />
+                                {cover && (
+                                  <img 
+                                    src={cover} 
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    className="w-16 h-16 object-cover rounded-lg border border-neutral-200 flex-shrink-0" 
+                                    alt="rec" 
+                                  />
+                                )}
                                 <div className="space-y-1 overflow-hidden">
                                   <span className="text-[9px] font-mono text-stone-400 uppercase tracking-widest block">AURA RECOMMEND</span>
                                   <h5 className="text-xs font-bold text-neutral-800 truncate leading-snug group-hover:text-emerald-800 transition-colors">
@@ -4082,7 +4081,8 @@ export default function App() {
                         activeAd.size?.startsWith('16:9') ? 'aspect-video' : activeAd.size?.startsWith('3:4') ? 'aspect-[3/4]' : 'aspect-square'
                       }`}>
                         <img 
-                          src={activeAd.imageUrl || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&auto=format&fit=crop&q=80"} 
+                          src={activeAd.imageUrl || (images[0]?.id ? `/api/images/${images[0].id}/public` : '')} 
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           alt={activeAd.title} 
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
                         />
