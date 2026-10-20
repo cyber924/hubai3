@@ -20,11 +20,11 @@ service cloud.firestore {
       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // Shared images collection
+    // Shared images collection (anyone can view images in the hub)
     match /images/{imageId} {
-      allow read: if resource.data.visibility == 'public' || (isSignedIn() && resource.data.ownerId == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
     }
 
     // Site-specific content (sites/{siteId}/blogs/{blogId})
@@ -48,11 +48,11 @@ service cloud.firestore {
       allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Published contents (anyone can read public posts matching public published status, or owners)
+    // Published contents (anyone can read all published posts)
     match /publishedContents/{blogId} {
-      allow read: if (resource.data.status == 'published' && resource.data.visibility == 'public') || (isSignedIn() && resource.data.ownerId == request.auth.uid);
-      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
     }
 
     // Active ads (anyone can read public ads)

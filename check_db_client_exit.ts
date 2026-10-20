@@ -11,9 +11,9 @@ async function checkDatabaseClient() {
     console.log("=== CHECKING publishedContents ===");
     try {
       const pubCol = collection(db, 'publishedContents');
-      const q = query(pubCol, where('status', '==', 'published'));
+      const q = query(pubCol, where('status', '==', 'published'), where('visibility', '==', 'public'));
       const snapshot = await getDocs(q);
-      console.log(`Found ${snapshot.docs.length} documents in publishedContents with status=='published':`);
+      console.log(`Found ${snapshot.docs.length} documents in publishedContents with status=='published' and visibility=='public':`);
       snapshot.docs.forEach(doc => {
         const data = doc.data();
         console.log(`ID: ${doc.id} | title: "${data.title}" | themePersona: "${data.themePersona}"`);

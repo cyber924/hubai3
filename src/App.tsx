@@ -160,8 +160,8 @@ const SEED_IMAGES = [
     tags: ["travel", "iceland", "nordic", "scenic", "nature"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==", // simple fallback base64 pixel
-    url: "https://images.unsplash.com/photo-1504893524553-ac55fce698be?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g1' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e293b'/><stop offset='100%' stop-color='%230f172a'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g1)'/><circle cx='400' cy='250' r='100' fill='%2338bdf8' opacity='0.2'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f8fafc' font-family='sans-serif' font-size='26' font-weight='bold'>아이슬란드 검은 모래 해변</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='monospace' font-size='14'>#iceland #nordic #nature</text></svg>",
+    url: "/api/images/img_iceland_cabin/public",
     ratio: "16:9",
     createdAt: new Date().toISOString()
   },
@@ -171,8 +171,8 @@ const SEED_IMAGES = [
     tags: ["product", "coffee", "minimal", "interior", "brand"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g2' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2378350f'/><stop offset='100%' stop-color='%23451a03'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g2)'/><circle cx='400' cy='250' r='100' fill='%23fbbf24' opacity='0.15'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23fef3c7' font-family='sans-serif' font-size='26' font-weight='bold'>미니멀리스트 에스프레소 세트</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d97706' font-family='monospace' font-size='14'>#product #coffee #minimal</text></svg>",
+    url: "/api/images/img_espresso_minimal/public",
     ratio: "4:3",
     createdAt: new Date().toISOString()
   },
@@ -182,8 +182,8 @@ const SEED_IMAGES = [
     tags: ["travel", "kyoto", "japan", "forest", "peaceful"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g3' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23064e3b'/><stop offset='100%' stop-color='%23022c22'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g3)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23ecfdf5' font-family='sans-serif' font-size='26' font-weight='bold'>교토 대나무 숲길과 빛</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%236ee7b7' font-family='monospace' font-size='14'>#travel #kyoto #japan</text></svg>",
+    url: "/api/images/img_kyoto_path/public",
     ratio: "16:9",
     createdAt: new Date().toISOString()
   },
@@ -193,8 +193,8 @@ const SEED_IMAGES = [
     tags: ["product", "artisan", "ceramic", "craft", "interior"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g4' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%239a3412'/><stop offset='100%' stop-color='%237c2d12'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g4)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23ffedd5' font-family='sans-serif' font-size='26' font-weight='bold'>수제 도자기 테라코타 화병</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23fdba74' font-family='monospace' font-size='14'>#product #ceramic #craft</text></svg>",
+    url: "/api/images/img_ceramic_vase/public",
     ratio: "3:4",
     createdAt: new Date().toISOString()
   },
@@ -204,8 +204,8 @@ const SEED_IMAGES = [
     tags: ["travel", "switzerland", "alps", "scenic", "winter"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g5' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231e3a8a'/><stop offset='100%' stop-color='%23172554'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g5)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23eff6ff' font-family='sans-serif' font-size='26' font-weight='bold'>알프스 설산 베르니나 열차</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%2393c5fd' font-family='monospace' font-size='14'>#travel #alps #switzerland</text></svg>",
+    url: "/api/images/img_swiss_train/public",
     ratio: "16:9",
     createdAt: new Date().toISOString()
   },
@@ -215,8 +215,8 @@ const SEED_IMAGES = [
     tags: ["product", "stationery", "leather", "classic", "analog"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g6' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23451a03'/><stop offset='100%' stop-color='%23292524'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g6)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f5f5f4' font-family='sans-serif' font-size='26' font-weight='bold'>빈티지 가죽 노매드 다이어리</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d6d3d1' font-family='monospace' font-size='14'>#product #leather #analog</text></svg>",
+    url: "/api/images/img_leather_notebook/public",
     ratio: "1:1",
     createdAt: new Date().toISOString()
   },
@@ -226,8 +226,8 @@ const SEED_IMAGES = [
     tags: ["travel", "tokyo", "cyberpunk", "night", "neon"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g7' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%23581c87'/><stop offset='100%' stop-color='%233b0764'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g7)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23faf5ff' font-family='sans-serif' font-size='26' font-weight='bold'>신주쿠 야간 네온사인 거리</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23d8b4fe' font-family='monospace' font-size='14'>#travel #tokyo #neon</text></svg>",
+    url: "/api/images/img_tokyo_night/public",
     ratio: "4:3",
     createdAt: new Date().toISOString()
   },
@@ -237,8 +237,8 @@ const SEED_IMAGES = [
     tags: ["product", "fashion", "linen", "natural", "minimal"],
     visibility: "public",
     ownerId: "system_curator",
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
-    url: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&auto=format&fit=crop&q=80",
+    dataUrl: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'><defs><linearGradient id='g8' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%2378716c'/><stop offset='100%' stop-color='%2344403c'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g8)'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%23f5f5f4' font-family='sans-serif' font-size='26' font-weight='bold'>유기농 린넨 오버사이즈 셔츠</text><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%23a8a29e' font-family='monospace' font-size='14'>#product #fashion #linen</text></svg>",
+    url: "/api/images/img_linen_shirt/public",
     ratio: "3:4",
     createdAt: new Date().toISOString()
   }
@@ -415,6 +415,24 @@ export default function App() {
   const [adLinkInput, setAdLinkInput] = useState<string>('');
   const [adSizeInput, setAdSizeInput] = useState<string>('1:1 (500x500)');
   const [isSavingAd, setIsSavingAd] = useState<boolean>(false);
+  const [bannerImageSourceType, setBannerImageSourceType] = useState<'hub' | 'upload'>('hub');
+  const [savedAdsList, setSavedAdsList] = useState<any[]>([]);
+
+  const loadSavedAdsList = async () => {
+    try {
+      const snap = await getDocs(collection(db, 'ads'));
+      const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setSavedAdsList(items);
+    } catch (err) {
+      console.warn("Failed to load saved ads list:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (currentRoute === 'dashboard') {
+      loadSavedAdsList();
+    }
+  }, [currentRoute]);
 
   // HTML5 History Clean Path Routing Helper
   const navigateTo = (route: string, extraUrl: string = "") => {
@@ -1270,8 +1288,8 @@ export default function App() {
           title: "프리미엄 원목 비스포크 가구 컬렉션",
           subtitle: "AURA 에디토리얼 독자 한정 특별 15% 바우처 패키지 출시",
           voucherCode: "AURACASA15",
-          linkUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200",
-          imageUrl: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&auto=format&fit=crop&q=80",
+          linkUrl: "/api/images/img_espresso_minimal/public",
+          imageUrl: "/api/images/img_espresso_minimal/public",
           size: "1:1 (500x500)"
         });
       }
@@ -1671,7 +1689,7 @@ export default function App() {
             <div className="relative rounded-2xl overflow-hidden bg-stone-950 text-white shadow-md border border-stone-800 p-8 md:p-14">
               <div className="absolute inset-0 opacity-20">
                 <img 
-                  src="https://images.unsplash.com/photo-1516962215378-7fa2e137ae93?w=1600&auto=format&fit=crop&q=80" 
+                  src="/api/images/img_kyoto_path/public" 
                   className="w-full h-full object-cover filter brightness-75 contrast-105"
                   alt="Webzine cover background"
                 />
@@ -3476,43 +3494,81 @@ export default function App() {
                     />
                   </div>
 
-                  {/* Image Upload Area with strict Under-200KB Canvas compression indicators */}
-                  <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50/50 space-y-3">
+                  {/* Image Source Selector & Upload / Hub Picker */}
+                  <div className="p-4 rounded-xl border border-neutral-200 bg-neutral-50/50 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-neutral-800">1:1 광고 배너 이미지 및 허브 보관 등록</span>
-                      <span className="text-[10px] bg-red-50 text-red-700 px-2 py-0.5 rounded font-mono font-bold">200KB 이내 압축 보증</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
-                      <div className="sm:col-span-2 space-y-2">
-                        <input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleAdImageUpload}
-                          className="text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800 cursor-pointer"
-                        />
-                        <p className="text-[10px] text-neutral-400 leading-normal">
-                          대용량 원본 파일이라도 업로드 즉시 HTML5 Canvas 압축 모듈이 작동해 <br/>
-                          <strong>70% JPEG 비주얼 규격(가로세로 500px 미만)으로 200KB 이내 완벽 자동 압축</strong>해 보관합니다.
-                        </p>
+                      <span className="text-xs font-bold text-neutral-800">배너 이미지 소스 선택 (허브 자산 연동 또는 직접 업로드)</span>
+                      <div className="flex items-center gap-1 bg-white border border-neutral-200 p-1 rounded-lg text-xs font-mono">
+                        <button
+                          type="button"
+                          onClick={() => setBannerImageSourceType('hub')}
+                          className={`px-3 py-1 rounded-md transition-all ${bannerImageSourceType === 'hub' ? 'bg-neutral-900 text-white font-bold' : 'text-neutral-500 hover:text-neutral-900'}`}
+                        >
+                          허브 이미지 선택 ({images.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBannerImageSourceType('upload')}
+                          className={`px-3 py-1 rounded-md transition-all ${bannerImageSourceType === 'upload' ? 'bg-neutral-900 text-white font-bold' : 'text-neutral-500 hover:text-neutral-900'}`}
+                        >
+                          새 파일 업로드
+                        </button>
                       </div>
-
-                      {adImageInput ? (
-                        <div className="text-center p-2.5 bg-white border border-neutral-200 rounded-xl space-y-1">
-                          <span className="text-[10px] text-neutral-400 block font-mono">압축 후 예상 파일크기</span>
-                          <span className={`text-xs font-bold font-mono ${adImageSizeKb > 200 ? 'text-red-600' : 'text-emerald-600'}`}>
-                            {adImageSizeKb} KB
-                          </span>
-                          <span className="text-[9px] text-neutral-400 block">
-                            {adImageSizeKb > 200 ? '❌ 200KB 제한 초과' : '✅ 등록 규격 적합'}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="p-4 bg-white border border-dashed border-neutral-300 text-center rounded-xl text-[10px] text-neutral-400">
-                          파일 선택 안됨
-                        </div>
-                      )}
                     </div>
+
+                    {bannerImageSourceType === 'hub' ? (
+                      <div className="space-y-3">
+                        <p className="text-[11px] text-neutral-500">
+                          이미 공유 이미지 허브에 등록된 고해상도 자산 중 광고 배너로 활용할 이미지를 선택하세요:
+                        </p>
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-48 overflow-y-auto p-2 bg-white rounded-xl border border-neutral-200">
+                          {images.map(img => {
+                            const imgUrl = `/api/images/${img.id}/public`;
+                            const isSelected = adImageInput === imgUrl || adImageInput === img.dataUrl;
+                            return (
+                              <div
+                                key={img.id}
+                                onClick={() => {
+                                  setAdImageInput(img.dataUrl || imgUrl);
+                                  setAdImageSizeKb(140); // Standard optimized size
+                                }}
+                                className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-pointer transition-all ${isSelected ? 'border-emerald-600 ring-2 ring-emerald-600/30' : 'border-stone-200 hover:border-stone-400'}`}
+                              >
+                                <img src={imgUrl} alt={img.title} className="w-full h-full object-cover" />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                        <div className="sm:col-span-2 space-y-2">
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleAdImageUpload}
+                            className="text-xs text-neutral-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[11px] file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800 cursor-pointer"
+                          />
+                          <p className="text-[10px] text-neutral-400 leading-normal">
+                            대용량 원본 파일이라도 업로드 즉시 HTML5 Canvas 압축 모듈이 작동해 
+                            <strong>70% JPEG 비주얼 규격으로 200KB 이내 자동 압축</strong>합니다.
+                          </p>
+                        </div>
+
+                        {adImageInput ? (
+                          <div className="text-center p-2.5 bg-white border border-neutral-200 rounded-xl space-y-1">
+                            <span className="text-[10px] text-neutral-400 block font-mono">예상 파일크기</span>
+                            <span className={`text-xs font-bold font-mono ${adImageSizeKb > 200 ? 'text-red-600' : 'text-emerald-600'}`}>
+                              {adImageSizeKb} KB
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-white border border-dashed border-neutral-300 text-center rounded-xl text-[10px] text-neutral-400">
+                            선택 안됨
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <button 
@@ -3611,6 +3667,76 @@ export default function App() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* 🖼️ BANNER GALLERY MANAGEMENT SECTION */}
+            <div className="bg-white border border-neutral-200 rounded-2xl p-6 space-y-6 shadow-sm">
+              <div className="border-b border-neutral-100 pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-neutral-800 font-sans tracking-tight">제휴 배너 갤러리 (Banner Gallery Archive)</h3>
+                  <p className="text-xs text-neutral-400 mt-0.5">등록된 모든 파트너 배너 자산을 한눈에 모아보고 즉시 라이브로 교체 활성화합니다.</p>
+                </div>
+                <span className="text-xs font-mono font-bold px-2.5 py-1 bg-stone-100 rounded-lg text-stone-700">
+                  총 {savedAdsList.length}개 등록됨
+                </span>
+              </div>
+
+              {savedAdsList.length === 0 ? (
+                <div className="py-12 text-center text-xs text-neutral-400">
+                  등록된 광고 배너가 없습니다. 위 관리 폼에서 새 배너를 등록해 보세요.
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {savedAdsList.map(ad => (
+                    <div key={ad.id} className="bg-[#FAF8F5] border border-stone-200 rounded-xl p-4 space-y-3 flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="relative aspect-square w-full rounded-lg overflow-hidden border border-stone-200 bg-stone-100">
+                          <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />
+                          <span className="absolute top-2 left-2 bg-stone-900/80 text-white text-[9px] font-mono px-2 py-0.5 rounded">
+                            {ad.size || '1:1'}
+                          </span>
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-bold text-neutral-900 line-clamp-1">{ad.title}</h4>
+                          <p className="text-[10px] text-neutral-500 line-clamp-1">{ad.subtitle}</p>
+                          <span className="inline-block text-[10px] font-mono bg-white px-2 py-0.5 rounded border border-stone-200 text-emerald-700 font-bold">
+                            {ad.voucherCode}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-stone-200 flex items-center justify-between">
+                        <button
+                          onClick={() => {
+                            setActiveAd(ad);
+                            localStorage.setItem('aura_active_ad', JSON.stringify(ad));
+                            alert(`🎉 '${ad.title}' 배너가 라이브 서버 활성 광고로 즉시 적용되었습니다!`);
+                          }}
+                          className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${activeAd?.id === ad.id ? 'bg-emerald-800 text-white' : 'bg-stone-900 text-white hover:bg-stone-800'}`}
+                        >
+                          {activeAd?.id === ad.id ? '라이브 적용중' : '활성화'}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (confirm(`'${ad.title}' 배너를 영구 삭제하시겠습니까?`)) {
+                              try {
+                                await deleteDoc(doc(db, 'ads', ad.id));
+                                loadSavedAdsList();
+                              } catch (err) {
+                                console.error("Failed to delete ad:", err);
+                              }
+                            }
+                          }}
+                          className="text-stone-400 hover:text-red-600 p-1.5 rounded-lg transition-colors"
+                          title="삭제"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

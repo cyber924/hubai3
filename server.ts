@@ -172,12 +172,12 @@ async function getPublicPublishedArticles(): Promise<any[]> {
     const now = new Date();
     let filtered = pubList.filter((b: any) => {
       if (!b.title || !b.id || !hasReadableArticleBody(b)) return false;
+      const hasValidImage = Array.isArray(b.sections) && b.sections.some((s: any) => s.imageId || s.imageUrl || s.image);
+      if (!hasValidImage) return false;
       const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
       if (pubDate > now) return false;
       return true;
     });
-
-    // No longer fall back to SERVER_SEED_BLOGS. When empty, return empty array.
 
     filtered.sort((a: any, b: any) => {
       const tA = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -191,6 +191,27 @@ async function getPublicPublishedArticles(): Promise<any[]> {
     throw err;
   }
 }
+
+// Admin endpoint to cleanup image-less or invalid blog entries from DB
+app.post('/api/admin/cleanup-blogs', async (req, res) => {
+  try {
+    let deletedCount = 0;
+    for (const collName of ['contentProjects', 'publishedContents']) {
+      const snap = await getDocs(collection(serverDb, collName));
+      for (const d of snap.docs) {
+        const data = d.data();
+        const hasImg = Array.isArray(data.sections) && data.sections.some((s: any) => s.imageId || s.imageUrl || s.image);
+        if (!data.title || !data.sections || data.sections.length === 0 || !hasImg) {
+          await deleteDoc(doc(serverDb, collName, d.id));
+          deletedCount++;
+        }
+      }
+    }
+    res.json({ success: true, deletedCount, message: `Successfully cleaned up ${deletedCount} invalid or image-less magazine/blog entries from DB.` });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // 6.3 Public image endpoint to return binary data from base64
 app.get('/api/images/:id/public', async (req, res) => {
@@ -790,7 +811,7 @@ async function startServer() {
 
         const articlesHtml = articles.map(art => {
           const coverImageId = art.sections?.[0]?.imageId || "";
-          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+          const coverUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : `${CANONICAL_BASE_URL}/api/images/img_espresso_minimal/public`;
           return `
             <article class="blog-card" style="margin-bottom: 2rem; border: 1px solid #e5e7eb; padding: 1rem; border-radius: 1rem; background: #fff;">
               <img src="${coverUrl}" alt="${art.title}" style="width:100%; max-height:300px; object-fit: cover; border-radius: 0.5rem;" />
@@ -884,7 +905,7 @@ async function startServer() {
       const postTitle = blogData.title || "Untitled Article";
       const postSummary = blogData.summary || "Bespoke Editorial Article";
       const coverImageId = blogData.sections?.[0]?.imageId || "";
-      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800';
+      const postImageUrl = coverImageId ? `${CANONICAL_BASE_URL}/api/images/${coverImageId}/public` : `${CANONICAL_BASE_URL}/api/images/img_espresso_minimal/public`;
       const publishedDateIso = new Date(blogData.createdAt || Date.now()).toISOString();
       const modifiedDateIso = new Date(blogData.updatedAt || Date.now()).toISOString();
       const authorName = blogData.authorName || 'Official Editor';

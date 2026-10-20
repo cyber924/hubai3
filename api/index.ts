@@ -172,12 +172,13 @@ async function getPublicPublishedArticles(): Promise<any[]> {
     const now = new Date();
     let filtered = pubList.filter((b: any) => {
       if (!b.title || !b.id || !hasReadableArticleBody(b)) return false;
+      // Must have at least one section with imageId or image reference
+      const hasValidImage = Array.isArray(b.sections) && b.sections.some((s: any) => s.imageId || s.imageUrl || s.image);
+      if (!hasValidImage) return false;
       const pubDate = new Date(b.updatedAt || b.createdAt || Date.now());
       if (pubDate > now) return false;
       return true;
     });
-
-    // No longer fall back to SERVER_SEED_BLOGS. When empty, return empty array.
 
     filtered.sort((a: any, b: any) => {
       const tA = new Date(a.updatedAt || a.createdAt || 0).getTime();
@@ -191,6 +192,27 @@ async function getPublicPublishedArticles(): Promise<any[]> {
     throw err;
   }
 }
+
+// Admin endpoint to cleanup image-less or invalid blog entries from DB
+app.post('/api/admin/cleanup-blogs', async (req, res) => {
+  try {
+    let deletedCount = 0;
+    for (const collName of ['contentProjects', 'publishedContents']) {
+      const snap = await getDocs(collection(serverDb, collName));
+      for (const d of snap.docs) {
+        const data = d.data();
+        const hasImg = Array.isArray(data.sections) && data.sections.some((s: any) => s.imageId || s.imageUrl || s.image);
+        if (!data.title || !data.sections || data.sections.length === 0 || !hasImg) {
+          await deleteDoc(doc(serverDb, collName, d.id));
+          deletedCount++;
+        }
+      }
+    }
+    res.json({ success: true, deletedCount, message: `Successfully cleaned up ${deletedCount} invalid or image-less magazine/blog entries from DB.` });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // 6.3 Public image endpoint to return binary data from base64
 app.get('/api/images/:id/public', async (req, res) => {
