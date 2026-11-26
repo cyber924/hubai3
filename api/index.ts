@@ -1,3 +1,4 @@
+import firebaseConfig from '../firebase-applet-config.json';
 import { hasReadableArticleBody } from '../src/lib/public-article';
 import express from 'express';
 import path from 'path';
@@ -26,52 +27,9 @@ const ai = new GoogleGenAI({
   },
 });
 
-// Initialize Firebase server-side for image fetching and validation with dynamic config loading
-let firebaseConfig: any;
-try {
-  const configPaths = [
-    path.join(process.cwd(), 'firebase-applet-config.json'),
-    path.resolve(__dirname, '../firebase-applet-config.json'),
-    path.resolve(__dirname, './firebase-applet-config.json'),
-    path.resolve(__dirname, 'firebase-applet-config.json')
-  ];
-  let loaded = false;
-  for (const p of configPaths) {
-    if (fs.existsSync(p)) {
-      firebaseConfig = JSON.parse(fs.readFileSync(p, 'utf-8'));
-      loaded = true;
-      break;
-    }
-  }
-  if (!loaded) {
-    throw new Error("firebase-applet-config.json not found in any of the search paths");
-  }
-} catch (err) {
-  console.warn("Failed to read firebase-applet-config.json, using hardcoded fallback:", err);
-  firebaseConfig = {
-    apiKey: process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyA8D5yXUcGChsxz4Dx3e6_qgzkHCXMAjCE",
-    authDomain: `${process.env.IMAGE_HUB_PROJECT_ID || "agentdock"}.firebaseapp.com`,
-    projectId: process.env.IMAGE_HUB_PROJECT_ID || "agentdock",
-    firestoreDatabaseId: "ai-studio-hubstudio3multit-b72f2ec8-4d59-4f2e-8ddb-5affb5e15524",
-    storageBucket: `${process.env.IMAGE_HUB_PROJECT_ID || "agentdock"}.firebasestorage.app`,
-  };
-}
-
-
-const configuredProject = process.env.IMAGE_HUB_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-const configuredKey = process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-const configuredDatabase = process.env.IMAGE_HUB_DATABASE_ID || process.env.FIRESTORE_DATABASE_ID;
-firebaseConfig = {
-  ...firebaseConfig,
-  ...(configuredProject ? { projectId: configuredProject } : {}),
-  ...(configuredKey ? { apiKey: configuredKey } : {}),
-  firestoreDatabaseId: configuredDatabase ||
-    (configuredProject && configuredProject !== firebaseConfig.projectId ? '(default)' : firebaseConfig.firestoreDatabaseId) ||
-    '(default)',
-};
-
+// Use the same Firebase project and database as the browser for site content.
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
-const serverDb = getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId);
+const serverDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' ? getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId) : getFirestore(firebaseApp);
 
 // Initialize Firebase server-side for image fetching and validation with dynamic config loading
 
