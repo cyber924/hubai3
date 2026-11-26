@@ -31,18 +31,44 @@ const ai = new GoogleGenAI({
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
 const serverDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' ? getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId) : getFirestore(firebaseApp);
 
-// Keep the content database independent of the shared Image Hub database.
-const imageHubProject = process.env.IMAGE_HUB_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
-const imageHubKey = process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || firebaseConfig.apiKey;
-const imageHubDatabase = process.env.IMAGE_HUB_DATABASE_ID || process.env.FIRESTORE_DATABASE_ID ||
-  (imageHubProject === firebaseConfig.projectId ? firebaseConfig.firestoreDatabaseId : '(default)') || '(default)';
-const imageHubApp = initializeApp({
-  ...firebaseConfig,
-  projectId: imageHubProject,
-  apiKey: imageHubKey,
-  authDomain: imageHubProject + '.firebaseapp.com',
-}, 'imageHubServerApp');
-const imageHubDb = imageHubDatabase === '(default)' ? getFirestore(imageHubApp) : getFirestore(imageHubApp, imageHubDatabase);
+// Same public Firestore REST transport as HubStudio4. No SDK credentials for public images.
+const hubProject = process.env.FIREBASE_PROJECT_ID || 'studio-9240700230-1dd9a';
+const hubApi = 'https://firestore.googleapis.com/v1/projects/' + encodeURIComponent(hubProject) + '/databases/(default)/documents/images';
+type HubValue = {stringValue?:string; integerValue?:string; doubleValue?:number; timestampValue?:string; booleanValue?:boolean; arrayValue?:{values?:HubValue[]}; mapValue?:{fields?:Record<string,HubValue>}};
+type HubDocument = {name:string;fields?:Record<string,HubValue>};
+function hubValue(v:HubValue):any {
+  if(v.stringValue!==undefined)return v.stringValue;
+  if(v.timestampValue!==undefined)return v.timestampValue;
+  if(v.booleanValue!==undefined)return v.booleanValue;
+  if(v.arrayValue)return (v.arrayValue.values||[]).map(hubValue);
+  if(v.mapValue)return Object.fromEntries(Object.entries(v.mapValue.fields||{}).map(([k,x])=>[k,hubValue(x)]));
+  return v.integerValue!==undefined?Number(v.integerValue):v.doubleValue??null;
+}
+function hubData(d:HubDocument):any {
+  const data=Object.fromEntries(Object.entries(d.fields||{}).map(([k,v])=>[k,hubValue(v)]));
+  return {...data,id:d.name.split('/').pop()};
+}
+async function hubImage(id:string):Promise<any|null>{
+  const r=await fetch(hubApi+'/'+encodeURIComponent(id),{cache:'no-store'});
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error('Image Hub HTTP '+r.status);
+  const data=hubData(await r.json() as HubDocument);
+  return data.visibility==='public'?data:null;
+}
+async function hubCatalog():Promise<any[]>{
+  let token='';const out:any[]=[];let pages=0;
+  const mask=['visibility','title','destination','tags','ratio','aspectRatio','createdAt'].map(x=>'&mask.fieldPaths='+x).join('');
+  do{
+    const r=await fetch(hubApi+'?pageSize=100'+mask+(token?'&pageToken='+encodeURIComponent(token):''),{cache:'no-store'});
+    if(!r.ok)throw new Error('Image Hub HTTP '+r.status);
+    const d=await r.json() as {documents?:HubDocument[];nextPageToken?:string};
+    for(const doc of d.documents||[]){const data=hubData(doc);if(data.visibility==='public')out.push(data);}
+    token=d.nextPageToken||'';
+    if(++pages>100)throw new Error('Image Hub pagination limit exceeded');
+  }while(token);
+  return out;
+}
+
 
 
 // Initialize Firebase server-side for image fetching and validation with dynamic config loading
@@ -194,15 +220,13 @@ app.get('/api/images/:id/public', async (req, res) => {
       return;
     }
 
-    const imageRef = doc(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
-    const snapshot = await getDoc(imageRef);
+    const data = await hubImage(imageId);
 
-    if (!snapshot.exists()) {
+    if (!data) {
       res.status(404).json({ error: 'Image not found' });
       return;
     }
 
-    const data = snapshot.data();
     
     // Check if visibility is private (allow public or default/unspecified visibility)
     if (data.visibility === 'private') {
@@ -211,7 +235,7 @@ app.get('/api/images/:id/public', async (req, res) => {
     }
 
     // Serve base64 or absolute URL
-    if (data.dataUrl && data.dataUrl.startsWith('data:')) {
+    if (typeof data.dataUrl === 'string' && data.dataUrl.startsWith('data:image/')) {
       const matches = data.dataUrl.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
       if (matches && matches.length === 3) {
         const contentType = matches[1];
@@ -226,8 +250,8 @@ app.get('/api/images/:id/public', async (req, res) => {
     }
 
     // If it's a URL already, redirect or stream it
-    if (data.imageUrl || data.url) {
-      res.redirect(data.imageUrl || data.url);
+    if (typeof (data.dataUrl || data.imageUrl || data.url) === 'string' && (data.dataUrl || data.imageUrl || data.url).startsWith('https://')) {
+      res.redirect(data.dataUrl || data.imageUrl || data.url);
       return;
     }
 
@@ -246,21 +270,16 @@ app.get('/api/public/images', async (req, res) => {
     const tag = (req.query.tag || req.query.filter || 'all') as string;
     const search = ((req.query.search || '') as string).toLowerCase().trim();
 
-    const imgCol = collection(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images');
-    const snapshot = await getDocs(query(imgCol, where('visibility', '==', 'public')));
-    let allImages = snapshot.docs.map(d => {
-      const data = d.data();
-      return {
-        id: d.id,
-        title: typeof data.title === 'string' ? data.title : 'Untitled Image',
-        tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown) => typeof t === 'string') : [],
+    let allImages = (await hubCatalog()).map(data => ({
+        id: data.id,
+        title: String(data.title || data.destination || 'Untitled Image'),
+        tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
         visibility: data.visibility,
-        ratio: data.ratio || '16:9',
+        ratio: data.ratio || data.aspectRatio || '16:9',
         createdAt: data.createdAt || new Date(0).toISOString(),
-        ownerId: data.ownerId || '',
-        imageUrl: `/api/images/${d.id}/public`,
-      };
-    });
+        ownerId: '',
+        imageUrl: '/api/images/'+encodeURIComponent(data.id)+'/public',
+    }));
 
     // Exclude strictly private images
     allImages = allImages.filter(img => img.visibility === 'public');
@@ -328,11 +347,9 @@ app.get('/api/public/blogs', async (req, res) => {
 // Helper to fetch image base64 if it exists for multimodal Gemini calls
 async function fetchImageBase64(imageId: string): Promise<{ base64: string; mimeType: string } | null> {
   try {
-    const imageRef = doc(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
-    const snapshot = await getDoc(imageRef);
-    if (snapshot.exists()) {
-      const data = snapshot.data();
-      if (data.dataUrl && data.dataUrl.startsWith('data:')) {
+    const data = await hubImage(imageId);
+    if (data) {
+      if (typeof data.dataUrl === 'string' && data.dataUrl.startsWith('data:image/')) {
         const matches = data.dataUrl.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
         if (matches && matches.length === 3) {
           return { mimeType: matches[1], base64: matches[2] };
