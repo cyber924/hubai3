@@ -695,7 +695,8 @@ export default function App() {
         const pubCol = collection(db, 'publishedContents');
         const q = query(pubCol, where('status', '==', 'published'), where('visibility', '==', 'public'));
         const snapshot = await getDocs(q);
-        firestorePublished = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        firestorePublished = snapshot.docs.map(d => ({ ...d.data(), id: d.id }));
+        fetchedFromApi = true;
         setPublicArticlesError(null); // Clear error if client fallback succeeds
       } catch (fallbackErr: any) {
         console.error("Client-side direct Firestore queries also failed:", fallbackErr.message);
@@ -703,21 +704,20 @@ export default function App() {
       }
     }
 
-    // 4. Cache and Deduplicate
-    const merged = firestorePublished;
-    
-    // Save to global public articles cache in LocalStorage if we successfully fetched anything from Firestore!
-    if (firestorePublished.length > 0) {
-      localStorage.setItem('aura_public_articles_cache', JSON.stringify(firestorePublished));
-    }
-
-    // Load from cache if merged is empty
-    let finalMerged = merged;
-    if (finalMerged.length === 0) {
-      const cachedStr = localStorage.getItem('aura_public_articles_cache');
-      if (cachedStr) {
-        finalMerged = JSON.parse(cachedStr);
+    // Only use cache during an actual outage, never after a successful empty result.
+    let finalMerged = firestorePublished;
+    try {
+      if (fetchedFromApi) {
+        localStorage.setItem('aura_public_articles_cache', JSON.stringify(firestorePublished));
+      } else {
+        const cached = JSON.parse(localStorage.getItem('aura_public_articles_cache') || '[]');
+        if (Array.isArray(cached) && cached.length) {
+          finalMerged = cached.filter(b => b?.status === 'published' && b?.visibility === 'public');
+          if (finalMerged.length) setPublicArticlesError(null);
+        }
       }
+    } catch (err) {
+      console.warn('Public article cache unavailable:', err);
     }
 
     // UNIQUE DEDUPLICATED LIST BY DOCUMENT ID ONLY (NO TITLE COLLAPSING AS REQUESTED)
