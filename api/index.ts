@@ -31,6 +31,20 @@ const ai = new GoogleGenAI({
 const firebaseApp = initializeApp(firebaseConfig, 'serverApp');
 const serverDb = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)' ? getFirestore(firebaseApp, firebaseConfig.firestoreDatabaseId) : getFirestore(firebaseApp);
 
+// Keep the content database independent of the shared Image Hub database.
+const imageHubProject = process.env.IMAGE_HUB_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || firebaseConfig.projectId;
+const imageHubKey = process.env.IMAGE_HUB_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || firebaseConfig.apiKey;
+const imageHubDatabase = process.env.IMAGE_HUB_DATABASE_ID || process.env.FIRESTORE_DATABASE_ID ||
+  (imageHubProject === firebaseConfig.projectId ? firebaseConfig.firestoreDatabaseId : '(default)') || '(default)';
+const imageHubApp = initializeApp({
+  ...firebaseConfig,
+  projectId: imageHubProject,
+  apiKey: imageHubKey,
+  authDomain: imageHubProject + '.firebaseapp.com',
+}, 'imageHubServerApp');
+const imageHubDb = imageHubDatabase === '(default)' ? getFirestore(imageHubApp) : getFirestore(imageHubApp, imageHubDatabase);
+
+
 // Initialize Firebase server-side for image fetching and validation with dynamic config loading
 
 // Predefined fallback seed blogs for zero-blank-screen SEO indexing
@@ -181,7 +195,7 @@ app.get('/api/images/:id/public', async (req, res) => {
       return;
     }
 
-    const imageRef = doc(serverDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
+    const imageRef = doc(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
     const snapshot = await getDoc(imageRef);
 
     if (!snapshot.exists()) {
@@ -239,7 +253,7 @@ app.get('/api/public/blogs', async (req, res) => {
 // Helper to fetch image base64 if it exists for multimodal Gemini calls
 async function fetchImageBase64(imageId: string): Promise<{ base64: string; mimeType: string } | null> {
   try {
-    const imageRef = doc(serverDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
+    const imageRef = doc(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images', imageId);
     const snapshot = await getDoc(imageRef);
     if (snapshot.exists()) {
       const data = snapshot.data();
