@@ -241,20 +241,20 @@ app.get('/api/images/:id/public', async (req, res) => {
 // Paginated public images endpoint (default 8 items per page)
 app.get('/api/public/images', async (req, res) => {
   try {
-    const page = Math.max(1, parseInt(req.query.page as string || '1', 10));
-    const limit = Math.max(1, parseInt(req.query.limit as string || '8', 10));
+    const page = Math.max(1, parseInt(req.query.page as string || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string || '8', 10) || 8));
     const tag = (req.query.tag || req.query.filter || 'all') as string;
     const search = ((req.query.search || '') as string).toLowerCase().trim();
 
     const imgCol = collection(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images');
-    const snapshot = await getDocs(imgCol);
+    const snapshot = await getDocs(query(imgCol, where('visibility', '==', 'public')));
     let allImages = snapshot.docs.map(d => {
       const data = d.data();
       return {
         id: d.id,
-        title: data.title || 'Untitled Image',
-        tags: Array.isArray(data.tags) ? data.tags : [],
-        visibility: data.visibility || 'public',
+        title: typeof data.title === 'string' ? data.title : 'Untitled Image',
+        tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown) => typeof t === 'string') : [],
+        visibility: data.visibility,
         ratio: data.ratio || '16:9',
         createdAt: data.createdAt || new Date(0).toISOString(),
         ownerId: data.ownerId || '',
@@ -263,7 +263,7 @@ app.get('/api/public/images', async (req, res) => {
     });
 
     // Exclude strictly private images
-    allImages = allImages.filter(img => img.visibility !== 'private');
+    allImages = allImages.filter(img => img.visibility === 'public');
 
     // Filter by tag/category if requested
     if (tag && tag !== 'all') {
