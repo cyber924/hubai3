@@ -1,4 +1,4 @@
-import firebaseConfig from './firebase-applet-config.json';
+
 import { hasReadableArticleBody } from './src/lib/public-article';
 import express from 'express';
 import path from 'path';
@@ -13,6 +13,9 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const firebaseConfigPath = [path.resolve(__dirname, './firebase-applet-config.json'), path.resolve(process.cwd(), 'firebase-applet-config.json'), path.resolve(__dirname, 'firebase-applet-config.json')].find(p => fs.existsSync(p));
+if (!firebaseConfigPath) throw new Error('Firebase configuration file not found');
+const firebaseConfig = JSON.parse(fs.readFileSync(firebaseConfigPath, 'utf8'));
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
