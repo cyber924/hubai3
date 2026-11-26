@@ -239,6 +239,81 @@ app.get('/api/images/:id/public', async (req, res) => {
   }
 });
 
+app.get('/api/public/images', async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page as string || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string || '8', 10) || 8));
+    const tag = (req.query.tag || req.query.filter || 'all') as string;
+    const search = ((req.query.search || '') as string).toLowerCase().trim();
+
+    const imgCol = collection(imageHubDb, process.env.IMAGE_HUB_COLLECTION || 'images');
+    const snapshot = await getDocs(query(imgCol, where('visibility', '==', 'public')));
+    let allImages = snapshot.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: typeof data.title === 'string' ? data.title : 'Untitled Image',
+        tags: Array.isArray(data.tags) ? data.tags.filter((t: unknown) => typeof t === 'string') : [],
+        visibility: data.visibility,
+        ratio: data.ratio || '16:9',
+        createdAt: data.createdAt || new Date(0).toISOString(),
+        ownerId: data.ownerId || '',
+        imageUrl: `/api/images/${d.id}/public`,
+      };
+    });
+
+    // Exclude strictly private images
+    allImages = allImages.filter(img => img.visibility === 'public');
+
+    // Filter by tag/category if requested
+    if (tag && tag !== 'all') {
+      const lowerTag = tag.toLowerCase();
+      const TAG_MAP: Record<string, string[]> = {
+        travel: ['travel', '여행', '해변', '자연공원', '도시'],
+        product: ['product', '제품', '쇼핑몰', '쇼핑몰 상세 이미지', 'shopping'],
+        fashion: ['fashion', '패션', '화장품', '모델'],
+        cafe: ['cafe', '카페', '음식', '주방', 'food'],
+        sports: ['sports', '스포츠', '파크골프', 'golf'],
+        realestate: ['부동산', '금융', '사무실'],
+        health: ['health', '건강', '생활']
+      };
+      const matchWords = TAG_MAP[lowerTag] || [lowerTag];
+      allImages = allImages.filter(img =>
+        matchWords.some(w => 
+          img.tags.some((t: string) => t.toLowerCase().includes(w.toLowerCase())) ||
+          img.title.toLowerCase().includes(w.toLowerCase())
+        )
+      );
+    }
+
+    // Filter by search query if requested
+    if (search) {
+      allImages = allImages.filter(img =>
+        img.title.toLowerCase().includes(search) ||
+        img.tags.some((t: string) => t.toLowerCase().includes(search))
+      );
+    }
+
+    // Sort by createdAt desc
+    allImages.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const total = allImages.length;
+    const totalPages = Math.ceil(total / limit);
+    const paginatedImages = allImages.slice((page - 1) * limit, page * limit);
+
+    res.status(200).json({
+      total,
+      page,
+      limit,
+      totalPages,
+      images: paginatedImages
+    });
+  } catch (error: any) {
+    console.error("Failed to fetch public images:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Public endpoint to fetch all published articles matching public published status
 app.get('/api/public/blogs', async (req, res) => {
   try {
